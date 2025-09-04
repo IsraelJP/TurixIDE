@@ -1,0 +1,45 @@
+
+options {
+  STATIC = false;
+}
+
+PARSER_BEGIN(Turix)
+package com.turix.TurixCC;
+
+public class Turix {
+    public static void main(String[] args) throws ParseException {
+        System.out.println("Ingresa una expresión (ej: 10+20-5). Ctrl+D para terminar:");
+        Turix parser = new Turix(System.in);
+        parser.Start();
+        System.out.println("✔ Expresión válida");
+    }
+}
+PARSER_END(Turix)
+
+SKIP : {
+  " " | "\t" | "\r" | "\n"
+}
+
+TOKEN : {
+    < NUM: (["0"-"9"])+ >
+  | < MAS: "+" >
+  | < MENOS: "-" >
+}
+
+void Start() :
+{}
+{
+    Exp() <EOF>
+}
+
+void Exp() :
+{}
+{
+    Term() ( ( <MAS> | <MENOS> ) Term() )*
+}
+
+void Term() :
+{}
+{
+    <NUM>
+}
