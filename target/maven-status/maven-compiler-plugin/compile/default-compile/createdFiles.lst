@@ -1,0 +1,8 @@
+com\turix\TurixCC\Main.class
+com\turix\TurixCC\TurixConstants.class
+com\turix\TurixCC\SimpleCharStream.class
+com\turix\TurixCC\Token.class
+com\turix\TurixCC\Turix.class
+com\turix\TurixCC\TokenMgrError.class
+com\turix\TurixCC\TurixTokenManager.class
+com\turix\TurixCC\ParseException.class
