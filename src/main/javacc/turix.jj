@@ -41,6 +41,9 @@ TOKEN : {
     //OPERADORES DE REALCION
     | < REL_OP : "==" | "!=" | ">=" | "<=" | ">" | "<" >
 
+    //DECLARACION VAR
+    | <DOS_PUN: ":">
+
 
     // Palabras reservadas para declaraciones
     |<IGUAL: "=">
@@ -134,6 +137,8 @@ TOKEN : {
 
     // Funciones comunes
     | <PRINT: "print">
+
+    |< IDENT : ( ["A"-"Z","a"-"z","_"] ) ( ["A"-"Z","a"-"z","0"-"9","_"] )* >
     }
 
 void Start() :
@@ -150,40 +155,49 @@ void Sentencias() :
     |Exp()
 }
 
-
-void Exp() :
+void ListaSentencias() :
 {}
 {
-    Term() ( ( <MAS> | <MENOS> ) Term() )*    
+     (Sentencias())*
 }
 
 
-//Declaracion IF
 
+//Declaracion IF
 void DeclaracionIF() :
 {}
 {
-    <IF> <PAR_I> Condicion() <PAR_F> <K_I> Sentencias() <K_F> 
+    <IF> <PAR_I> Condicion() <PAR_F> <K_I> (Sentencias())* <K_F> 
 }
 
 void Condicion() :
 {}
 {
-    (<NUM> | <VAR> ) <REL_OP> (<NUM>|<VAR>) 
+    ( <NUM> | <IDENT> ) <REL_OP> ( <NUM> | <IDENT> )
 }
 
 
-//Declaracion VAR (Pendiente)
+
 void DeclaracionVar() :
 {}
 {
-    <VAR> <LETTER> <IGUAL> <NUM>
+    <VAR> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> Exp() )?
 }
 
+void Tipo() :
+{}
+{
+    <INT> | <UINT> | <FLOAT> | <STRING> | <BOOL>
+}
 
+void Exp() :
+{}
+{
+    Term() ( ( <MAS> | <MENOS> ) Term() )*
+}
 
 void Term() :
 {}
 {
-    <NUM>
+    <NUM> | <IDENT> | <TRUE> | <FALSE>
 }
