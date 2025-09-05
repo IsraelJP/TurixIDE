@@ -24,6 +24,95 @@ TOKEN : {
     < NUM: (["0"-"9"])+ >
   | < MAS: "+" >
   | < MENOS: "-" >
+  | <DOUBLE: "Double">
+    | <INT: "Int">
+    | <UINT: "UInt">
+    | <FLOAT: "Float">
+    | <STRING: "String">
+    | <BOOL: "Bool">
+    | <CHARACTER: "Character">
+
+    // Palabras reservadas para declaraciones
+    | <CLASS: "class">
+    | <DEINIT: "deinit">
+    | <ENUM: "enum">
+    | <EXTENSION: "extension">
+    | <FUNC: "func">
+    | <IMPORT: "import">
+    | <INIT: "init">
+    | <INOUT: "inout">
+    | <INTERNAL: "internal">
+    | <LET: "let">
+    | <OPERATOR: "operator">
+    | <PRIVATE: "private">
+    | <PUBLIC: "public">
+    | <STATIC: "static">
+    | <STRUCT: "struct">
+    | <SUBSCRIPT: "subscript">
+    | <TYPEALIAS: "typealias">
+    | <VAR: "var">
+    
+    // Palabras reservadas para control de flujo
+    | <BREAK: "break">
+    | <CASE: "case">
+    | <CONTINUE: "continue">
+    | <DEFAULT_KEYWORD: "default"> // Renombrado para evitar conflicto con estado léxico
+    | <DO: "do">
+    | <ELSE: "else">
+    | <FALLTHROUGH: "fallthrough">
+    | <FOR: "for">
+    | <IF: "if">
+    | <IN: "in">
+    | <RETURN: "return">
+    | <SWITCH: "switch">
+    | <WHERE: "where">
+    
+    // Palabras reservadas para tipos y contexto
+    | <AS: "as">
+    | <CATCH: "catch">
+    | <FALSE: "false">
+    | <IS: "is">
+    | <NIL: "nil">
+    | <RETHROWS: "rethrows">
+    | <SUPER: "super">
+    | <SELF: "self">
+    | <SELF_CAP: "Self"> // Renombrado para evitar confusión
+    | <THROW: "throw">
+    | <THROWS: "throws">
+    | <TRUE: "true">
+    | <TRY: "try">
+    
+    // Palabras reservadas para modificadores y atributos
+    | <ASSOCIATIVITY: "associativity">
+    | <CONVENIENCE: "convenience">
+    | <DYNAMIC: "dynamic">
+    | <DIDSET: "didSet">
+    | <FINAL: "final">
+    | <GET: "get">
+    | <INFIX: "infix">
+    | <INDIRECT: "indirect">
+    | <LAZY: "lazy">
+    | <LEFT: "left">
+    | <MUTATING: "mutating">
+    | <NONE: "none">
+    | <NONMUTATING: "nonmutating">
+    | <OPTIONAL: "optional">
+    | <OVERRIDE: "override">
+    | <POSTFIX: "postfix">
+    | <PRECEDENCE: "precedence">
+    | <PREFIX: "prefix">
+    | <PROTOCOL: "protocol">
+    | <PROTOCOL_CAP: "Protocol"> // Diferenciamos "protocol" y "Protocol"
+    | <REQUIRED: "required">
+    | <RIGHT: "right">
+    | <SET: "set">
+    | <TYPE: "Type">
+    | <UNOWNED: "unowned">
+    | <WEAK: "weak">
+    | <WILLSET: "willSet">
+    
+    // Funciones comunes
+    | <PRINT: "print">
 }
 
 void Start() :
