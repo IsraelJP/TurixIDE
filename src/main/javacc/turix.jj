@@ -21,18 +21,21 @@ SKIP : {
 }
 
 TOKEN : {
-    < NUM: (["0"-"9"])+ >
-  | < MAS: "+" >
-  | < MENOS: "-" >
-  | <DOUBLE: "Double">
+      < NUM: (["0"-"9"])+ >
+    | < MAS: "+" >
+    | < MENOS: "-" >
+    | <DOUBLE: "Double">
     | <INT: "Int">
     | <UINT: "UInt">
     | <FLOAT: "Float">
     | <STRING: "String">
     | <BOOL: "Bool">
     | <CHARACTER: "Character">
+    | < LETTER: [ "A"-"Z", "a"-"z" ] >
+
 
     // Palabras reservadas para declaraciones
+    |<IGUAL: "=">
     | <CLASS: "class">
     | <DEINIT: "deinit">
     | <ENUM: "enum">
@@ -119,14 +122,25 @@ TOKEN : {
 void Start() :
 {}
 {
-    Exp() <EOF>
+    ( Exp() | DeclaracionVar() ) <EOF>
 }
 
 void Exp() :
 {}
 {
     Term() ( ( <MAS> | <MENOS> ) Term() )*
+    
+    
 }
+
+
+void DeclaracionVar() :
+{}
+{
+    <VAR> <LETTER> <IGUAL> <NUM>
+}
+
+
 
 void Term() :
 {}
