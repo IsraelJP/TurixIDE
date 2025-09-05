@@ -9,6 +9,9 @@ public class Turix implements TurixConstants {
         parser.Start();
         System.out.println("\u2714 Expresi\u00f3n v\u00e1lida");
     }
+    public Turix(SimpleCharStream stream) {
+    this(new TurixTokenManager(stream));
+}
 
   final public void Start() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -406,7 +409,7 @@ public class Turix implements TurixConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[102];
+	 boolean[] la1tokens = new boolean[101];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
@@ -429,7 +432,7 @@ public class Turix implements TurixConstants {
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 102; i++) {
+	 for (int i = 0; i < 101; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;

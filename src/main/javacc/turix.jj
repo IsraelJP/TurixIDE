@@ -13,6 +13,10 @@ public class Turix {
         parser.Start();
         System.out.println("✔ Expresión válida");
     }
+    public Turix(SimpleCharStream stream) {
+    this(new TurixTokenManager(stream));
+}
+
 }
 PARSER_END(Turix)
 
@@ -138,7 +142,8 @@ TOKEN : {
     // Funciones comunes
     | <PRINT: "print">
 
-    |< IDENT : ( ["A"-"Z","a"-"z","_"] ) ( ["A"-"Z","a"-"z","0"-"9","_"] )* >
+    //Salto Línea 
+    | < LINEA : ("\r\n" | "\n" | "\r") >
     }
 
 void Start() :
@@ -150,9 +155,9 @@ void Start() :
 void Sentencias() :
 {}
 {
-     DeclaracionVar()
-    |DeclaracionIF()
-    |Exp()
+     DeclaracionVar() 
+    |DeclaracionIF() 
+    |Exp() 
 }
 
 void ListaSentencias() :
