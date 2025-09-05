@@ -51,7 +51,7 @@ TOKEN : {
     | <SUBSCRIPT: "subscript">
     | <TYPEALIAS: "typealias">
     | <VAR: "var">
-    
+
     // Palabras reservadas para control de flujo
     | <BREAK: "break">
     | <CASE: "case">
@@ -66,7 +66,8 @@ TOKEN : {
     | <RETURN: "return">
     | <SWITCH: "switch">
     | <WHERE: "where">
-    
+    | <WHILE: "while">
+
     // Palabras reservadas para tipos y contexto
     | <AS: "as">
     | <CATCH: "catch">
@@ -81,7 +82,7 @@ TOKEN : {
     | <THROWS: "throws">
     | <TRUE: "true">
     | <TRY: "try">
-    
+
     // Palabras reservadas para modificadores y atributos
     | <ASSOCIATIVITY: "associativity">
     | <CONVENIENCE: "convenience">
@@ -110,10 +111,10 @@ TOKEN : {
     | <UNOWNED: "unowned">
     | <WEAK: "weak">
     | <WILLSET: "willSet">
-    
+
     // Funciones comunes
     | <PRINT: "print">
-}
+    }
 
 void Start() :
 {}
