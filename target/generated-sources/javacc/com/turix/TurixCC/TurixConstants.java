@@ -200,6 +200,8 @@ public interface TurixConstants {
   int WILLSET = 98;
   /** RegularExpression Id. */
   int PRINT = 99;
+  /** RegularExpression Id. */
+  int LINEA = 100;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -306,6 +308,7 @@ public interface TurixConstants {
     "\"weak\"",
     "\"willSet\"",
     "\"print\"",
+    "<LINEA>",
   };
 
 }

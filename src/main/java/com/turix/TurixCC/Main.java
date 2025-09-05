@@ -222,37 +222,54 @@ public class Main extends JFrame {
     }
 
     /** Compila/Evalúa el contenido del inputArea línea por línea y escribe en outputArea. */
+     /** Compila/Evalúa el contenido del inputArea línea por línea y escribe en outputArea. */
     private void onEvaluate(ActionEvent e) {
-        String text = inputArea.getText();
-        if (text == null || text.isBlank()) {
-            setStatus("Nada que compilar");
-            return;
-        }
-        outputArea.append("== Compilando/Analizando ==\n");
-        String[] lines = text.split("\\R");
-        int ok = 0, err = 0;
-        for (String line : lines) {
-            String expr = line.trim();
-            if (expr.isEmpty()) continue;
-            try {
-                Turix parser = new Turix(new java.io.StringReader(expr));
-                parser.Start(); // si Start() devuelve double, puedes imprimir el valor
-                outputArea.append(expr + "  ✔ Válida\n");
-                ok++;
-            } catch (ParseException pe) {
-                outputArea.append(expr + "  ✘ Sintaxis: " + pe.getMessage() + "\n");
-                err++;
-            } catch (TokenMgrError le) {
-                outputArea.append(expr + "  ✘ Léxico: " + le.getMessage() + "\n");
-                err++;
-            } catch (Exception ex) {
-                outputArea.append(expr + "  ✘ Error: " + ex.getMessage() + "\n");
-                err++;
-            }
-        }
-        outputArea.append(String.format("-- Listo: %d OK, %d errores --%n%n", ok, err));
-        setStatus(String.format("Compilación terminada: %d OK, %d errores", ok, err));
+    String text = inputArea.getText();
+    if (text == null || text.isBlank()) {
+        setStatus("Nada que compilar");
+        return;
     }
+
+    outputArea.append("== Compilando/Analizando ==\n");
+    String[] lines = text.split("\\R", -1);
+    int ok = 0, err = 0;
+
+    for (int i = 0; i < lines.length; i++) {
+        String expr = lines[i];
+        if (expr == null || expr.isEmpty()) continue;
+
+        try {
+            // ✅ Inicializar con línea real
+            SimpleCharStream scs = new SimpleCharStream(
+                new StringReader(expr + "\n"),
+                i + 1, // línea real
+                1      // columna inicial
+            );
+            Turix parser = new Turix(scs);
+            parser.Start();
+
+            outputArea.append(String.format("Línea %d: %s ✔ Válida%n", i + 1, expr.trim()));
+            ok++;
+        } catch (ParseException pe) {
+            // getMessage() ya trae la línea/columna real
+            outputArea.append(String.format("Línea %d: %s ✘ Sintaxis: %s%n",
+                    i + 1, expr.trim(), pe.getMessage()));
+            err++;
+        } catch (TokenMgrError tme) {
+            outputArea.append(String.format("Línea %d: %s ✘ Léxico: %s%n",
+                    i + 1, expr.trim(), tme.getMessage()));
+            err++;
+        } catch (Exception ex) {
+            outputArea.append(String.format("Línea %d: %s ✘ Error: %s%n",
+                    i + 1, expr.trim(), ex.getMessage()));
+            err++;
+        }
+    }
+
+    outputArea.append(String.format("-- Listo: %d OK, %d errores --%n%n", ok, err));
+    setStatus(String.format("Compilación terminada: %d OK, %d errores", ok, err));
+}
+
 
     /* ---------- Utilidades ---------- */
 
