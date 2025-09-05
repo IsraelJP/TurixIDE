@@ -33,6 +33,14 @@ TOKEN : {
     | <CHARACTER: "Character">
     | < LETTER: [ "A"-"Z", "a"-"z" ] >
 
+    //OPERADORES LOGICOS
+    | <AND: "&&">
+    | <NOT: "!">
+    | <OR: "||">
+    
+    //OPERADORES DE REALCION
+    | < REL_OP : "==" | "!=" | ">=" | "<=" | ">" | "<" >
+
 
     // Palabras reservadas para declaraciones
     |<IGUAL: "=">
@@ -70,6 +78,15 @@ TOKEN : {
     | <SWITCH: "switch">
     | <WHERE: "where">
     | <WHILE: "while">
+    
+    //ABRIR Y CERRAR
+    | <K_I: "{"> 
+    | <K_F: "}">
+    | <PAR_I: "(">
+    | <PAR_F: ")">
+    | <COR_I: "[">
+    | <COR_F: "]">
+
 
     // Palabras reservadas para tipos y contexto
     | <AS: "as">
@@ -122,18 +139,41 @@ TOKEN : {
 void Start() :
 {}
 {
-    ( Exp() | DeclaracionVar() ) <EOF>
+    ( Exp() | DeclaracionVar() | DeclaracionIF() ) <EOF>
 }
+
+void Sentencias() :
+{}
+{
+     DeclaracionVar()
+    |DeclaracionIF()
+    |Exp()
+}
+
 
 void Exp() :
 {}
 {
-    Term() ( ( <MAS> | <MENOS> ) Term() )*
-    
-    
+    Term() ( ( <MAS> | <MENOS> ) Term() )*    
 }
 
 
+//Declaracion IF
+
+void DeclaracionIF() :
+{}
+{
+    <IF> <PAR_I> Condicion() <PAR_F> <K_I> Sentencias() <K_F> 
+}
+
+void Condicion() :
+{}
+{
+    (<NUM> | <VAR> ) <REL_OP> (<NUM>|<VAR>) 
+}
+
+
+//Declaracion VAR (Pendiente)
 void DeclaracionVar() :
 {}
 {
