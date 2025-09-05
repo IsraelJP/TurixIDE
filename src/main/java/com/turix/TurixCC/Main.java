@@ -1,33 +1,79 @@
 package com.turix.TurixCC;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.StringReader;
-import java.io.IOException;
 
-public class Main {
-    public static void main(String[] args) {
-        System.out.println("Calculadora Turix. Escribe una expresión y presiona Enter.");
-        System.out.println("Vacío o Ctrl+D para salir.");
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
-            while (true) {
-                System.out.print(">> ");
-                System.out.flush(); // asegura que el prompt se vea al instante
-                String line = br.readLine();
-                if (line == null || line.trim().isEmpty()) {
-                    System.out.println("Hasta luego.");
-                    break;
-                }
-                try {
-                    Turix parser = new Turix(new StringReader(line));
-                    parser.Start();  // tu Start actual solo valida; si luego haces que regrese un valor, aquí lo imprimes
-                    System.out.println("✔ Expresión válida");
-                } catch (ParseException pe) {
-                    System.out.println("✘ Error de sintaxis: " + pe.getMessage());
-                }
+public class Main extends JFrame {
+
+    private final JTextArea inputArea = new JTextArea(8, 40);
+    private final JTextArea outputArea = new JTextArea(10, 40);
+    private final JButton evalButton = new JButton("Evaluar");
+
+    public Main() {
+        super("Calculadora Turix (GUI)");
+
+        // Áreas
+        inputArea.setLineWrap(true);
+        inputArea.setWrapStyleWord(true);
+        outputArea.setEditable(false);
+
+        // Layout
+        setLayout(new BorderLayout(10, 10));
+        JPanel top = new JPanel(new BorderLayout(5, 5));
+        top.add(new JLabel("Expresiones (una por línea):"), BorderLayout.NORTH);
+        top.add(new JScrollPane(inputArea), BorderLayout.CENTER);
+
+        JPanel bottom = new JPanel(new BorderLayout(5, 5));
+        bottom.add(new JLabel("Resultados:"), BorderLayout.NORTH);
+        bottom.add(new JScrollPane(outputArea), BorderLayout.CENTER);
+
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        actions.add(evalButton);
+
+        add(top, BorderLayout.NORTH);
+        add(actions, BorderLayout.CENTER);
+        add(bottom, BorderLayout.SOUTH);
+
+        // Acción botón
+        evalButton.addActionListener(this::onEvaluate);
+
+        // Atajos: Ctrl+Enter para evaluar
+        inputArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl ENTER"), "EVALUAR");
+        inputArea.getActionMap().put("EVALUAR", new AbstractAction() {
+            @Override public void actionPerformed(ActionEvent e) { onEvaluate(null); }
+        });
+
+        // Ventana
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        pack();
+        setLocationRelativeTo(null);
+    }
+
+    private void onEvaluate(ActionEvent e) {
+        String text = inputArea.getText();
+        if (text == null || text.isBlank()) return;
+
+        String[] lines = text.split("\\R");
+        for (String line : lines) {
+            String expr = line.trim();
+            if (expr.isEmpty()) continue;
+
+            try {
+                Turix parser = new Turix(new StringReader(expr));
+                parser.Start(); // Tu Start actual solo valida
+                outputArea.append(expr + "  ✔ Válida\n");
+            } catch (ParseException pe) {
+                outputArea.append(expr + "  ✘ Error: " + pe.getMessage() + "\n");
+            } catch (Exception ex) {
+                outputArea.append(expr + "  ✘ Error: " + ex.getMessage() + "\n");
             }
-        } catch (IOException e) {
-            System.err.println("Error de E/S: " + e.getMessage());
         }
+        outputArea.append("\n");
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new Main().setVisible(true));
     }
 }
