@@ -1,6 +1,7 @@
 
 options {
   STATIC = false;
+  UNICODE_INPUT = true;
 }
 
 PARSER_BEGIN(Turix)
@@ -25,9 +26,13 @@ SKIP : {
 }
 
 TOKEN : {
-      < NUM: (["0"-"9"])+ >
+     
+    < NUM:( ["0"-"9"] )+ ( "." (["0"-"9"])+ )? >
     | < MAS: "+" >
-    | < MENOS: "-" >
+    | < MENOS: "-" >    
+    |< MULTIPLICACION: "*" > 
+    | < DIVISION: "/" > 
+    | < MODULO: "%" > 
     | <DOUBLE: "Double">
     | <INT: "Int">
     | <UINT: "UInt">
@@ -36,6 +41,9 @@ TOKEN : {
     | <BOOL: "Bool">
     | <CHARACTER: "Character">
     | < LETTER: [ "A"-"Z", "a"-"z" ] >
+
+    //Valores booleanos
+    |<BOOLEANO_VAL: "true"|"false">
 
     //OPERADORES LOGICOS
     | <AND: "&&">
@@ -143,6 +151,10 @@ TOKEN : {
     | <PRINT: "print">
 
     |< IDENT : ( ["A"-"Z","a"-"z","_"] ) ( ["A"-"Z","a"-"z","0"-"9","_"] )* >
+    
+    //ERRORES
+    | < ERROR: (["0"-"9"])+ ("." (["0"-"9"])+){2,} >
+     | < ERROROPERA:  "=!" | "=>" | "=<" >
     }
 
 void Start() :
