@@ -142,8 +142,7 @@ TOKEN : {
     // Funciones comunes
     | <PRINT: "print">
 
-    //Salto Línea 
-    | < LINEA : ("\r\n" | "\n" | "\r") >
+    |< IDENT : ( ["A"-"Z","a"-"z","_"] ) ( ["A"-"Z","a"-"z","0"-"9","_"] )* >
     }
 
 void Start() :
