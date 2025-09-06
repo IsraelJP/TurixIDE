@@ -251,10 +251,17 @@ public class Main extends JFrame {
                 TurixTokenManager lex = new TurixTokenManager(scs);
                 Token t;
                 while ((t = lex.getNextToken()).kind != TurixConstants.EOF) {
-                    lexArea.append(String.format("Línea %d: TOKEN %-15s => '%s'%n",
+                    if(t.kind == TurixConstants.ERROR || t.kind == TurixConstants.ERROROPERA){
+                        lexArea.append(String.format(
+                            "Línea %d: %s ✘ Léxico: Lexical error at line %d, column %d.  Encountered: '%s'%n", i + 1, t.image, 
+                             i + 1,  t.beginColumn, t.image));
+                        erroresLex++;
+                    }else{
+                        lexArea.append(String.format("Línea %d: Token %-15s => '%s'%n",
                             i + 1,
-                            TurixConstants.tokenImage[t.kind],
+                            TokenCase.getTokenNombre(t.kind),
                             t.image));
+                    }
                 }
                 // ---- Sintaxis ----
                 scs = new SimpleCharStream(new StringReader(expr + "\n"), i + 1, 1);
