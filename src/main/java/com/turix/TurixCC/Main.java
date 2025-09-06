@@ -251,9 +251,9 @@ public class Main extends JFrame {
                 TurixTokenManager lex = new TurixTokenManager(scs);
                 Token t;
                 while ((t = lex.getNextToken()).kind != TurixConstants.EOF) {
-                    lexArea.append(String.format("Línea %d: TOKEN %-15s => '%s'%n",
+                    lexArea.append(String.format("Línea %d: Token %-15s => '%s'%n",
                             i + 1,
-                            TurixConstants.tokenImage[t.kind],
+                            TokenCase.getTokenNombre(t.kind),
                             t.image));
                 }
                 // ---- Sintaxis ----
