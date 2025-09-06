@@ -409,7 +409,7 @@ public class Turix implements TurixConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[101];
+	 boolean[] la1tokens = new boolean[102];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
@@ -432,7 +432,7 @@ public class Turix implements TurixConstants {
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 101; i++) {
+	 for (int i = 0; i < 102; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;
