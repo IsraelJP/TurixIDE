@@ -41,7 +41,7 @@ public class TokenCase {
             case TurixConstants.OPERATOR: return "Operator";
             case TurixConstants.PRIVATE: return "Private";
             case TurixConstants.PUBLIC: return "Public";
-            case TurixConstants.STATIC: return "Statis";
+            case TurixConstants.STATIC: return "Static";
             case TurixConstants.STRUCT: return "Struct";
             case TurixConstants.SUBSCRIPT: return "Subscript";
             case TurixConstants.TYPEALIAS: return "Typealias";
@@ -80,7 +80,7 @@ public class TokenCase {
             case TurixConstants.TRUE: return "True";
             case TurixConstants.TRY: return "Try";
             case TurixConstants.ASSOCIATIVITY: return "Associativity";
-            case TurixConstants.CONVENIENCE: return "Convencience";
+            case TurixConstants.CONVENIENCE: return "Convenience";
             case TurixConstants.DYNAMIC: return "Dynamic";
             case TurixConstants.DIDSET: return "Didset";
             case TurixConstants.FINAL: return "Final";
@@ -107,7 +107,7 @@ public class TokenCase {
             case TurixConstants.WEAK: return "Weak";
             case TurixConstants.WILLSET: return "Willset";
             case TurixConstants.PRINT: return "Print";
-            case TurixConstants.IDENT: return "Ident";
+            case TurixConstants.IDENT: return "Identificador";
             case TurixConstants.EOF: return "EOF";
             case TurixConstants.ERROR: return "ERROR";
             case TurixConstants.ERROROPERA: return "ERROR";
