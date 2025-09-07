@@ -54,8 +54,8 @@ public class Main extends JFrame {
 
         lexArea.setFont(mono);
         synArea.setFont(mono);
-        lexArea.setEditable(false);
-        synArea.setEditable(false);
+        lexArea.setEditable(true);
+        synArea.setEditable(true);
         lexArea.setBorder(new EmptyBorder(8,8,8,8));
         synArea.setBorder(new EmptyBorder(8,8,8,8));
 
@@ -72,7 +72,9 @@ public class Main extends JFrame {
 
         // Editor panel
         JPanel editorPanel = new JPanel(new BorderLayout(6,6));
-        editorPanel.add(styledLabel("Editor (una expresión por línea)"), BorderLayout.NORTH);
+       // Línea donde creas el label superior del editor:
+        editorPanel.add(styledLabel("Editor (programa completo; Ctrl+Enter para compilar)"), BorderLayout.NORTH);
+    
         editorPanel.add(inputScroll, BorderLayout.CENTER);
 
         // Split
@@ -223,68 +225,66 @@ public class Main extends JFrame {
         }
     }
 
-    /** Compila/Evalúa el contenido y separa los errores en Léxico / Sintáctico. */
-    private void onEvaluate(ActionEvent e) {
-        String text = inputArea.getText();
-        if (text == null || text.isBlank()) {
-            setStatus("Nada que compilar");
-            return;
-        }
+    /** Compila/Evalúa el contenido completo y separa errores en Léxico / Sintáctico. */
+private void onEvaluate(ActionEvent e) {
+    String text = inputArea.getText();
+    if (text == null || text.isBlank()) {
+        setStatus("Nada que compilar");
+        return;
+    }
 
-        lexArea.setText("== Análisis Léxico ==\n");
-        synArea.setText("== Análisis Sintáctico ==\n");
+    lexArea.setText("== Análisis Léxico ==\n");
+    synArea.setText("== Análisis Sintáctico ==\n");
 
-        int erroresLex = 0;
-        int erroresSin = 0;
-        int ok = 0;
+    int erroresLex = 0;
+    int erroresSin = 0;
 
-        String[] lines = text.split("\\R", -1);
-
-        for (int i = 0; i < lines.length; i++) {
-            String expr = lines[i];
-            if (expr == null || expr.isEmpty()) continue;
-            boolean errorLex = false;
-            
-            try {
-                SimpleCharStream scs = new SimpleCharStream(new StringReader(expr + "\n"), i + 1, 1);
-                // ---- Léxico----
-                TurixTokenManager lex = new TurixTokenManager(scs);
-                Token t;
-                while ((t = lex.getNextToken()).kind != TurixConstants.EOF) {
-                    if(t.kind == TurixConstants.ERROR || t.kind == TurixConstants.ERROROPERA){
-                        lexArea.append(String.format(
-                            "Línea %d: %s ✘ Léxico: Lexical error at line %d, column %d.  Encountered: '%s'%n", i + 1, t.image, 
-                             i + 1,  t.beginColumn, t.image));
-                        erroresLex++;
-                    }else{
-                        lexArea.append(String.format("Línea %d: Token %-15s => '%s'%n",
-                            i + 1,
-                            TokenCase.getTokenNombre(t.kind),
-                            t.image));
-                    }
-                }
-                // ---- Sintaxis ----
-                scs = new SimpleCharStream(new StringReader(expr + "\n"), i + 1, 1);
-                Turix parser = new Turix(scs);
-                parser.Start();
-            } catch (TokenMgrError tme) {
-                errorLex = true;
-                lexArea.append(String.format("Línea %d: %s ✘ Léxico: %s%n",
-                        i + 1, expr.trim(), tme.getMessage()));
+    // ---------- LÉXICO (sobre TODO el texto) ----------
+    try {
+        SimpleCharStream scsLex = new SimpleCharStream(new StringReader(text), 1, 1);
+        TurixTokenManager lex = new TurixTokenManager(scsLex);
+        Token t;
+        while ((t = lex.getNextToken()).kind != TurixConstants.EOF) {
+            if (t.kind == TurixConstants.ERROR || t.kind == TurixConstants.ERROROPERA) {
+                lexArea.append(String.format(
+                    "Línea %d, Col %d: '%s' ✘ Léxico: token inválido%n",
+                    t.beginLine, t.beginColumn, t.image));
                 erroresLex++;
-            } catch (ParseException pe) {
-                synArea.append(String.format("Línea %d: %s ✘ Sintaxis: %s%n",
-                        i + 1, expr.trim(), pe.getMessage()));
-                erroresSin++;
-            } catch (Exception ex) {
-                synArea.append(String.format("Línea %d: %s ✘ Error: %s%n",
-                        i + 1, expr.trim(), ex.getMessage()));
-                erroresSin++;
+            } else {
+                lexArea.append(String.format(
+                    "Línea %d, Col %d: Token %-18s => '%s'%n",
+                    t.beginLine, t.beginColumn, TokenCase.getTokenNombre(t.kind), t.image));
             }
         }
-        setStatus(String.format("Compilación terminada:  %d errores léxicos, %d errores sintácticos",
-                erroresLex, erroresSin));
+        if (erroresLex == 0) {
+            lexArea.append("✔ Sin errores léxicos\n");
+        }
+    } catch (TokenMgrError tme) {
+        lexArea.append("✘ Léxico: " + tme.getMessage() + "\n");
+        erroresLex++;
+    } catch (Exception ex) {
+        lexArea.append("✘ Léxico: " + ex.getMessage() + "\n");
+        erroresLex++;
     }
+
+    // ---------- SINTÁCTICO (sobre TODO el texto) ----------
+    try {
+        Turix parser = new Turix(new StringReader(text));
+        parser.Start();
+        synArea.append("✔ Programa válido\n");
+    } catch (ParseException pe) {
+        // El mensaje de JavaCC ya trae línea/columna; lo mostramos como “1 solo error sintáctico”
+        synArea.append("✘ Sintaxis: " + pe.getMessage() + "\n");
+        erroresSin++;
+    } catch (Exception ex) {
+        synArea.append("✘ Error: " + ex.getMessage() + "\n");
+        erroresSin++;
+    }
+
+    setStatus(String.format(
+        "Compilación terminada: %d errores léxicos, %d errores sintácticos",
+        erroresLex, erroresSin));
+}
 
     /* ---------- Utilidades ---------- */
 

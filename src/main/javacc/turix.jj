@@ -160,39 +160,34 @@ TOKEN : {
 void Start() :
 {}
 {
-    ( Exp() | DeclaracionVar() | DeclaracionIF() ) <EOF>
-}
-
-void Sentencias() :
-{}
-{
-     DeclaracionVar() 
-    |DeclaracionIF() 
-    |Exp() 
+    ListaSentencias() <EOF>
 }
 
 void ListaSentencias() :
 {}
 {
-     (Sentencias())*
+    ( Sentencia() )*
 }
 
+void Sentencia() :
+{}
+{
+     DeclaracionVar()
+   | DeclaracionIF()
+   | Exp()
+}
 
-
-//Declaracion IF
 void DeclaracionIF() :
 {}
 {
-    <IF> <PAR_I> Condicion() <PAR_F> <K_I> (Sentencias())* <K_F> 
+    <IF> <PAR_I> Condicion() <PAR_F> <K_I> ListaSentencias() <K_F>
 }
 
 void Condicion() :
 {}
 {
-    ( <NUM> | <IDENT> ) <REL_OP> ( <NUM> | <IDENT> )
+    Exp() <REL_OP> Exp()
 }
-
-
 
 void DeclaracionVar() :
 {}
@@ -215,5 +210,5 @@ void Exp() :
 void Term() :
 {}
 {
-    <NUM> | <IDENT> | <TRUE> | <FALSE>
+      <NUM> | <IDENT> | <TRUE> | <FALSE> | <PAR_I> Exp() <PAR_F>
 }
