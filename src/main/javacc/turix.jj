@@ -214,13 +214,13 @@ void Condicion() :
 void DeclaracionVar() :
 {}
 {
-    <VAR> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> ExpOr() )?
+    <VAR> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> Exp() )?
 }
 
 void DeclaracionLet() :
 {}
 {
-    <LET> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> ExpOr() )?
+    <LET> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> Exp() )?
 }
 
 
@@ -236,17 +236,12 @@ void Exp() :
    (<MENOS>)? Term() ( ( <MAS> | <MENOS> | <MULTIPLICACION> | <DIVISION> | <MODULO> ) Term() )*
 }
 
-void ExpOr() :
-{}
-{
-    Exp() ( <INTERROGACION> ExpOr() )?
-}
 
 void Term() :
 {}
 {
       <NUM> | <IDENT>| <TRUE> | <FALSE>  | <STRING_LITERAL>
-      |<READLINE> <PAR_I> <PAR_F> | Tipo() <PAR_I> ExpOr() <PAR_F> | <PAR_I> <PAR_F> 
+      |<READLINE> <PAR_I> <PAR_F> | Tipo() <PAR_I> Exp() <PAR_F> | <PAR_I> <PAR_F> 
 }
 
 void Func() :
@@ -308,13 +303,13 @@ void Opcion_Print():
 void SentenciaRepeat():
 {}
 {
-    <REPEAT> <K_I> ListaSentencias() <K_F> <WHILE> <PAR_I> Condicion() <PAR_F>
+    <REPEAT> <K_I> ListaSentencias() <K_F> <WHILE> Condicion() 
 }
 
 void Asignacion():
 {}
 {
-    <IDENT> ( (<IGUAL> ExpOr()) | Term())
+    <IDENT> ( (<IGUAL> Exp()) | Term())
 }
 
 
