@@ -22,13 +22,27 @@ public class Turix implements TurixConstants {
     label_1:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case NUM:
+      case STRING_LITERAL:
+      case MENOS:
+      case DOUBLE:
+      case INT:
+      case UINT:
+      case FLOAT:
+      case STRING:
+      case BOOL:
       case FUNC:
       case LET:
       case VAR:
       case REPEAT:
       case IF:
       case RETURN:
+      case SWITCH:
+      case PAR_I:
+      case FALSE:
+      case TRUE:
       case PRINT:
+      case READLINE:
       case IDENT:{
         ;
         break;
@@ -73,6 +87,23 @@ public class Turix implements TurixConstants {
       }
     case IDENT:{
       Asignacion();
+      break;
+      }
+    case NUM:
+    case STRING_LITERAL:
+    case MENOS:
+    case DOUBLE:
+    case INT:
+    case UINT:
+    case FLOAT:
+    case STRING:
+    case BOOL:
+    case SWITCH:
+    case PAR_I:
+    case FALSE:
+    case TRUE:
+    case READLINE:{
+      Switch();
       break;
       }
     default:
@@ -523,6 +554,72 @@ public class Turix implements TurixConstants {
     }
 }
 
+  final public void Switch() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case SWITCH:{
+      jj_consume_token(SWITCH);
+      jj_consume_token(IDENT);
+      break;
+      }
+    case NUM:{
+      jj_consume_token(NUM);
+      break;
+      }
+    case STRING_LITERAL:
+    case MENOS:
+    case DOUBLE:
+    case INT:
+    case UINT:
+    case FLOAT:
+    case STRING:
+    case BOOL:
+    case PAR_I:
+    case FALSE:
+    case TRUE:
+    case READLINE:
+    case IDENT:{
+      Exp();
+      break;
+      }
+    default:
+      jj_la1[22] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    jj_consume_token(K_I);
+    Case();
+    label_7:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case CASE:{
+        ;
+        break;
+        }
+      default:
+        jj_la1[23] = jj_gen;
+        break label_7;
+      }
+      Case();
+    }
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case DEFAULT_KEYWORD:{
+      jj_consume_token(DEFAULT_KEYWORD);
+      break;
+      }
+    default:
+      jj_la1[24] = jj_gen;
+      ;
+    }
+    jj_consume_token(K_F);
+}
+
+  final public void Case() throws ParseException {
+    jj_consume_token(CASE);
+    jj_consume_token(NUM);
+    jj_consume_token(DOS_PUN);
+    ListaSentencias();
+}
+
   /** Generated Token Manager. */
   public TurixTokenManager token_source;
   SimpleCharStream jj_input_stream;
@@ -532,7 +629,7 @@ public class Turix implements TurixConstants {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[22];
+  final private int[] jj_la1 = new int[25];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -544,16 +641,16 @@ public class Turix implements TurixConstants {
 	   jj_la1_init_3();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x0,0x0,0x280000,0x280000,0x800000,0x10000000,0x800000,0x10000000,0x3f000,0x100,0xf80,0xf80,0x3f060,0x0,0x1000000,0x4000000,0x8000000,0x4000000,0x4000000,0x3f160,0x0,0x1003f060,};
+	   jj_la1_0 = new int[] {0x3f160,0x3f160,0x280000,0x280000,0x800000,0x10000000,0x800000,0x10000000,0x3f000,0x100,0xf80,0xf80,0x3f060,0x0,0x1000000,0x4000000,0x8000000,0x4000000,0x4000000,0x3f160,0x0,0x1003f060,0x3f160,0x0,0x0,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0xa204042,0xa204042,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x18000,0x18000,0x0,};
+	   jj_la1_1 = new int[] {0x1a204042,0x1a204042,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x18000,0x18000,0x0,0x10000000,0x40000,0x100000,};
 	}
 	private static void jj_la1_init_2() {
-	   jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10082,0x0,0x0,0x0,0x0,0x0,0x0,0x10082,0x0,0x10082,};
+	   jj_la1_2 = new int[] {0x10082,0x10082,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10082,0x0,0x0,0x0,0x0,0x0,0x0,0x10082,0x0,0x10082,0x10082,0x0,0x0,};
 	}
 	private static void jj_la1_init_3() {
-	   jj_la1_3 = new int[] {0xa000,0xa000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xc000,0x8000,0x0,0x0,0x0,0x0,0x0,0xc000,0x0,0xc000,};
+	   jj_la1_3 = new int[] {0xe000,0xe000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xc000,0x8000,0x0,0x0,0x0,0x0,0x0,0xc000,0x0,0xc000,0xc000,0x0,0x0,};
 	}
 
   /** Constructor with InputStream. */
@@ -567,7 +664,7 @@ public class Turix implements TurixConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 25; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -581,7 +678,7 @@ public class Turix implements TurixConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 25; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -591,7 +688,7 @@ public class Turix implements TurixConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 25; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -609,7 +706,7 @@ public class Turix implements TurixConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 25; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -618,7 +715,7 @@ public class Turix implements TurixConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 25; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -627,7 +724,7 @@ public class Turix implements TurixConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 22; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 25; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -683,7 +780,7 @@ public class Turix implements TurixConstants {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
 	 }
-	 for (int i = 0; i < 22; i++) {
+	 for (int i = 0; i < 25; i++) {
 	   if (jj_la1[i] == jj_gen) {
 		 for (int j = 0; j < 32; j++) {
 		   if ((jj_la1_0[i] & (1<<j)) != 0) {

@@ -194,6 +194,7 @@ void Sentencia() :
    | Imprimir()
    | SentenciaRepeat()
    | Asignacion()
+   | Switch()
    
 }
 
@@ -313,3 +314,15 @@ void Asignacion():
 }
 
 
+void Switch():
+{}
+{
+    (<SWITCH> <IDENT> | <NUM> | Exp()) <K_I> Case() (Case())* (<DEFAULT_KEYWORD>)? <K_F>
+}
+
+
+void Case():
+{}
+{
+    <CASE> <NUM> <DOS_PUN> ListaSentencias()
+}
