@@ -39,193 +39,193 @@ public interface TurixConstants {
   /** RegularExpression Id. */
   int CHARACTER = 18;
   /** RegularExpression Id. */
-  int LETTER = 19;
+  int AND = 19;
   /** RegularExpression Id. */
-  int AND = 20;
+  int NOT = 20;
   /** RegularExpression Id. */
-  int NOT = 21;
+  int OR = 21;
   /** RegularExpression Id. */
-  int OR = 22;
+  int REL_OP = 22;
   /** RegularExpression Id. */
-  int REL_OP = 23;
+  int DOS_PUN = 23;
   /** RegularExpression Id. */
-  int DOS_PUN = 24;
+  int FLECHA = 24;
   /** RegularExpression Id. */
-  int FLECHA = 25;
+  int COMILLA = 25;
   /** RegularExpression Id. */
-  int COMILLA = 26;
+  int COMA = 26;
   /** RegularExpression Id. */
-  int COMA = 27;
+  int INTERROGACION = 27;
   /** RegularExpression Id. */
-  int INTERROGACION = 28;
+  int IGUAL = 28;
   /** RegularExpression Id. */
-  int IGUAL = 29;
+  int CLASS = 29;
   /** RegularExpression Id. */
-  int CLASS = 30;
+  int DEINIT = 30;
   /** RegularExpression Id. */
-  int DEINIT = 31;
+  int ENUM = 31;
   /** RegularExpression Id. */
-  int ENUM = 32;
+  int EXTENSION = 32;
   /** RegularExpression Id. */
-  int EXTENSION = 33;
+  int FUNC = 33;
   /** RegularExpression Id. */
-  int FUNC = 34;
+  int IMPORT = 34;
   /** RegularExpression Id. */
-  int IMPORT = 35;
+  int INIT = 35;
   /** RegularExpression Id. */
-  int INIT = 36;
+  int INOUT = 36;
   /** RegularExpression Id. */
-  int INOUT = 37;
+  int INTERNAL = 37;
   /** RegularExpression Id. */
-  int INTERNAL = 38;
+  int LET = 38;
   /** RegularExpression Id. */
-  int LET = 39;
+  int OPERATOR = 39;
   /** RegularExpression Id. */
-  int OPERATOR = 40;
+  int PRIVATE = 40;
   /** RegularExpression Id. */
-  int PRIVATE = 41;
+  int PUBLIC = 41;
   /** RegularExpression Id. */
-  int PUBLIC = 42;
+  int STATIC = 42;
   /** RegularExpression Id. */
-  int STATIC = 43;
+  int STRUCT = 43;
   /** RegularExpression Id. */
-  int STRUCT = 44;
+  int SUBSCRIPT = 44;
   /** RegularExpression Id. */
-  int SUBSCRIPT = 45;
+  int TYPEALIAS = 45;
   /** RegularExpression Id. */
-  int TYPEALIAS = 46;
+  int VAR = 46;
   /** RegularExpression Id. */
-  int VAR = 47;
+  int TERMINATOR = 47;
   /** RegularExpression Id. */
-  int TERMINATOR = 48;
+  int SEPARATOR = 48;
   /** RegularExpression Id. */
-  int SEPARATOR = 49;
+  int BREAK = 49;
   /** RegularExpression Id. */
-  int BREAK = 50;
+  int CASE = 50;
   /** RegularExpression Id. */
-  int CASE = 51;
+  int CONTINUE = 51;
   /** RegularExpression Id. */
-  int CONTINUE = 52;
+  int DEFAULT_KEYWORD = 52;
   /** RegularExpression Id. */
-  int DEFAULT_KEYWORD = 53;
+  int REPEAT = 53;
   /** RegularExpression Id. */
-  int DO = 54;
+  int ELSE = 54;
   /** RegularExpression Id. */
-  int ELSE = 55;
+  int FALLTHROUGH = 55;
   /** RegularExpression Id. */
-  int FALLTHROUGH = 56;
+  int FOR = 56;
   /** RegularExpression Id. */
-  int FOR = 57;
+  int IF = 57;
   /** RegularExpression Id. */
-  int IF = 58;
+  int IN = 58;
   /** RegularExpression Id. */
-  int IN = 59;
+  int RETURN = 59;
   /** RegularExpression Id. */
-  int RETURN = 60;
+  int SWITCH = 60;
   /** RegularExpression Id. */
-  int SWITCH = 61;
+  int WHERE = 61;
   /** RegularExpression Id. */
-  int WHERE = 62;
+  int WHILE = 62;
   /** RegularExpression Id. */
-  int WHILE = 63;
+  int K_I = 63;
   /** RegularExpression Id. */
-  int K_I = 64;
+  int K_F = 64;
   /** RegularExpression Id. */
-  int K_F = 65;
+  int PAR_I = 65;
   /** RegularExpression Id. */
-  int PAR_I = 66;
+  int PAR_F = 66;
   /** RegularExpression Id. */
-  int PAR_F = 67;
+  int COR_I = 67;
   /** RegularExpression Id. */
-  int COR_I = 68;
+  int COR_F = 68;
   /** RegularExpression Id. */
-  int COR_F = 69;
+  int AS = 69;
   /** RegularExpression Id. */
-  int AS = 70;
+  int CATCH = 70;
   /** RegularExpression Id. */
-  int CATCH = 71;
+  int FALSE = 71;
   /** RegularExpression Id. */
-  int FALSE = 72;
+  int IS = 72;
   /** RegularExpression Id. */
-  int IS = 73;
+  int NIL = 73;
   /** RegularExpression Id. */
-  int NIL = 74;
+  int RETHROWS = 74;
   /** RegularExpression Id. */
-  int RETHROWS = 75;
+  int SUPER = 75;
   /** RegularExpression Id. */
-  int SUPER = 76;
+  int SELF = 76;
   /** RegularExpression Id. */
-  int SELF = 77;
+  int SELF_CAP = 77;
   /** RegularExpression Id. */
-  int SELF_CAP = 78;
+  int THROW = 78;
   /** RegularExpression Id. */
-  int THROW = 79;
+  int THROWS = 79;
   /** RegularExpression Id. */
-  int THROWS = 80;
+  int TRUE = 80;
   /** RegularExpression Id. */
-  int TRUE = 81;
+  int TRY = 81;
   /** RegularExpression Id. */
-  int TRY = 82;
+  int ASSOCIATIVITY = 82;
   /** RegularExpression Id. */
-  int ASSOCIATIVITY = 83;
+  int CONVENIENCE = 83;
   /** RegularExpression Id. */
-  int CONVENIENCE = 84;
+  int DYNAMIC = 84;
   /** RegularExpression Id. */
-  int DYNAMIC = 85;
+  int DIDSET = 85;
   /** RegularExpression Id. */
-  int DIDSET = 86;
+  int FINAL = 86;
   /** RegularExpression Id. */
-  int FINAL = 87;
+  int GET = 87;
   /** RegularExpression Id. */
-  int GET = 88;
+  int INFIX = 88;
   /** RegularExpression Id. */
-  int INFIX = 89;
+  int INDIRECT = 89;
   /** RegularExpression Id. */
-  int INDIRECT = 90;
+  int LAZY = 90;
   /** RegularExpression Id. */
-  int LAZY = 91;
+  int LEFT = 91;
   /** RegularExpression Id. */
-  int LEFT = 92;
+  int MUTATING = 92;
   /** RegularExpression Id. */
-  int MUTATING = 93;
+  int NONE = 93;
   /** RegularExpression Id. */
-  int NONE = 94;
+  int NONMUTATING = 94;
   /** RegularExpression Id. */
-  int NONMUTATING = 95;
+  int OPTIONAL = 95;
   /** RegularExpression Id. */
-  int OPTIONAL = 96;
+  int OVERRIDE = 96;
   /** RegularExpression Id. */
-  int OVERRIDE = 97;
+  int POSTFIX = 97;
   /** RegularExpression Id. */
-  int POSTFIX = 98;
+  int PRECEDENCE = 98;
   /** RegularExpression Id. */
-  int PRECEDENCE = 99;
+  int PREFIX = 99;
   /** RegularExpression Id. */
-  int PREFIX = 100;
+  int PROTOCOL = 100;
   /** RegularExpression Id. */
-  int PROTOCOL = 101;
+  int PROTOCOL_CAP = 101;
   /** RegularExpression Id. */
-  int PROTOCOL_CAP = 102;
+  int REQUIRED = 102;
   /** RegularExpression Id. */
-  int REQUIRED = 103;
+  int RIGHT = 103;
   /** RegularExpression Id. */
-  int RIGHT = 104;
+  int SET = 104;
   /** RegularExpression Id. */
-  int SET = 105;
+  int TYPE = 105;
   /** RegularExpression Id. */
-  int TYPE = 106;
+  int UNOWNED = 106;
   /** RegularExpression Id. */
-  int UNOWNED = 107;
+  int WEAK = 107;
   /** RegularExpression Id. */
-  int WEAK = 108;
+  int WILLSET = 108;
   /** RegularExpression Id. */
-  int WILLSET = 109;
+  int PRINT = 109;
   /** RegularExpression Id. */
-  int PRINT = 110;
+  int READLINE = 110;
   /** RegularExpression Id. */
-  int READLINE = 111;
+  int IDENT = 111;
   /** RegularExpression Id. */
-  int IDENT = 112;
+  int LETTER = 112;
   /** RegularExpression Id. */
   int ERROR = 113;
   /** RegularExpression Id. */
@@ -255,7 +255,6 @@ public interface TurixConstants {
     "\"String\"",
     "\"Bool\"",
     "\"Character\"",
-    "<LETTER>",
     "\"&&\"",
     "\"!\"",
     "\"||\"",
@@ -290,7 +289,7 @@ public interface TurixConstants {
     "\"case\"",
     "\"continue\"",
     "\"default\"",
-    "\"do\"",
+    "\"repeat\"",
     "\"else\"",
     "\"fallthrough\"",
     "\"for\"",
@@ -349,6 +348,7 @@ public interface TurixConstants {
     "\"print\"",
     "\"readLine\"",
     "<IDENT>",
+    "<LETTER>",
     "<ERROR>",
     "<ERROROPERA>",
   };

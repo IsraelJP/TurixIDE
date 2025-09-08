@@ -54,7 +54,7 @@ public class TokenCase {
             case TurixConstants.CASE: return "Case";
             case TurixConstants.CONTINUE: return "Continue";
             case TurixConstants.DEFAULT_KEYWORD: return "Default";
-            case TurixConstants.DO: return "Do";
+            case TurixConstants.REPEAT: return "Repeat";
             case TurixConstants.ELSE: return "Else";
             case TurixConstants.FALLTHROUGH: return "Fallthrough";
             case TurixConstants.FOR: return "For";
