@@ -28,6 +28,13 @@ SKIP : {
 TOKEN : {
      
     < NUM:( ["0"-"9"] )+ ( "." (["0"-"9"])+ )? >
+    |<STRING_LITERAL : 
+        // String multilínea 
+        "\"\"\"" (~["\""] | "\"" | "\"\"")* "\"\"\""
+      |
+        // String normal de una línea
+        "\"" ( "\\" | ~["\"","\\","\n","\r"] )* "\""
+     >
     | < MAS: "+" >
     | < MENOS: "-" >    
     |< MULTIPLICACION: "*" > 
@@ -42,8 +49,6 @@ TOKEN : {
     | <CHARACTER: "Character">
     | < LETTER: [ "A"-"Z", "a"-"z" ] >
 
-    //Valores booleanos
-    |<BOOLEANO_VAL: "true"|"false">
 
     //OPERADORES LOGICOS
     | <AND: "&&">
@@ -53,8 +58,12 @@ TOKEN : {
     //OPERADORES DE REALCION
     | < REL_OP : "==" | "!=" | ">=" | "<=" | ">" | "<" >
 
-    //DECLARACION VAR
+    //Simbolos
     | <DOS_PUN: ":">
+    |<FLECHA : "->">
+    |<COMILLA : "\"">
+    |<COMA : ",">
+    |<INTERROGACION : "??">
 
 
     // Palabras reservadas para declaraciones
@@ -77,6 +86,8 @@ TOKEN : {
     | <SUBSCRIPT: "subscript">
     | <TYPEALIAS: "typealias">
     | <VAR: "var">
+    | <TERMINATOR: "terminator">
+    | <SEPARATOR: "separator">
 
     // Palabras reservadas para control de flujo
     | <BREAK: "break">
@@ -149,6 +160,7 @@ TOKEN : {
 
     // Funciones comunes
     | <PRINT: "print">
+    | <READLINE: "readLine">
 
     |< IDENT : ( ["A"-"Z","a"-"z","_"] ) ( ["A"-"Z","a"-"z","0"-"9","_"] )* >
     
@@ -173,10 +185,16 @@ void Sentencia() :
 {}
 {
      DeclaracionVar()
+   | DeclaracionLet()
    | DeclaracionIF()
    | Exp()
+   | Func()
+   | RetornoSentencia()
+   | Imprimir()
 }
 
+
+//Declaracion IF
 void DeclaracionIF() :
 {}
 {
@@ -195,20 +213,83 @@ void DeclaracionVar() :
     <VAR> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> Exp() )?
 }
 
+void DeclaracionLet():
+{}
+{
+ <LET> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> Exp() ( <INTERROGACION> Exp() )? )?
+}
+
 void Tipo() :
 {}
 {
-    <INT> | <UINT> | <FLOAT> | <STRING> | <BOOL>
+    <INT> | <UINT> | <FLOAT> | <STRING> | <BOOL> | <DOUBLE>
 }
 
 void Exp() :
 {}
 {
-    Term() ( ( <MAS> | <MENOS> ) Term() )*
+   (<MENOS>)? Term() ( ( <MAS> | <MENOS> ) Term() )*
 }
 
 void Term() :
 {}
 {
-      <NUM> | <IDENT> | <TRUE> | <FALSE> | <PAR_I> Exp() <PAR_F>
+      <NUM> | <IDENT>  | <TRUE> | <FALSE> | <PAR_I> Exp() <PAR_F> | <STRING_LITERAL>
+      |<READLINE> <PAR_I> <PAR_F> | Tipo() <PAR_I> Exp() <PAR_F>  
+}
+
+void Func() :
+{}
+{
+    <FUNC> <IDENT> <PAR_I> (Parametros())? <PAR_F> (Retorno())? <K_I> ListaSentencias() <K_F>
+}
+
+void Parametros() :
+{}
+{
+   Parametro() (<COMA> Parametro())*
+}
+
+void Parametro() :
+{}
+{
+   <IDENT> <DOS_PUN> Tipo()
+}
+
+void Retorno() :
+{}
+{
+   <FLECHA> Tipo()
+}
+
+void RetornoSentencia():
+{}
+{
+    <RETURN> Exp() (<INTERROGACION> Exp())?
+}
+
+void Imprimir():
+{}
+{
+    <PRINT> <PAR_I> ListaExpPrint()  <PAR_F>
+}
+
+void ListaExp():
+{}
+{
+    Exp() (<COMA> Exp())*
+}
+
+void ListaExpPrint():
+{}
+{
+    Exp() (<COMA> (Exp() | Opcion_Print()  ))*
+}
+
+void Opcion_Print():
+{}
+{
+ (  <TERMINATOR> <DOS_PUN> Exp() ) |
+(  <SEPARATOR> <DOS_PUN> Exp() ) 
+
 }

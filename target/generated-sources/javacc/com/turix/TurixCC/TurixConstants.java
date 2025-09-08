@@ -13,33 +13,33 @@ public interface TurixConstants {
   /** RegularExpression Id. */
   int NUM = 5;
   /** RegularExpression Id. */
-  int MAS = 6;
+  int STRING_LITERAL = 6;
   /** RegularExpression Id. */
-  int MENOS = 7;
+  int MAS = 7;
   /** RegularExpression Id. */
-  int MULTIPLICACION = 8;
+  int MENOS = 8;
   /** RegularExpression Id. */
-  int DIVISION = 9;
+  int MULTIPLICACION = 9;
   /** RegularExpression Id. */
-  int MODULO = 10;
+  int DIVISION = 10;
   /** RegularExpression Id. */
-  int DOUBLE = 11;
+  int MODULO = 11;
   /** RegularExpression Id. */
-  int INT = 12;
+  int DOUBLE = 12;
   /** RegularExpression Id. */
-  int UINT = 13;
+  int INT = 13;
   /** RegularExpression Id. */
-  int FLOAT = 14;
+  int UINT = 14;
   /** RegularExpression Id. */
-  int STRING = 15;
+  int FLOAT = 15;
   /** RegularExpression Id. */
-  int BOOL = 16;
+  int STRING = 16;
   /** RegularExpression Id. */
-  int CHARACTER = 17;
+  int BOOL = 17;
   /** RegularExpression Id. */
-  int LETTER = 18;
+  int CHARACTER = 18;
   /** RegularExpression Id. */
-  int BOOLEANO_VAL = 19;
+  int LETTER = 19;
   /** RegularExpression Id. */
   int AND = 20;
   /** RegularExpression Id. */
@@ -51,171 +51,185 @@ public interface TurixConstants {
   /** RegularExpression Id. */
   int DOS_PUN = 24;
   /** RegularExpression Id. */
-  int IGUAL = 25;
+  int FLECHA = 25;
   /** RegularExpression Id. */
-  int CLASS = 26;
+  int COMILLA = 26;
   /** RegularExpression Id. */
-  int DEINIT = 27;
+  int COMA = 27;
   /** RegularExpression Id. */
-  int ENUM = 28;
+  int INTERROGACION = 28;
   /** RegularExpression Id. */
-  int EXTENSION = 29;
+  int IGUAL = 29;
   /** RegularExpression Id. */
-  int FUNC = 30;
+  int CLASS = 30;
   /** RegularExpression Id. */
-  int IMPORT = 31;
+  int DEINIT = 31;
   /** RegularExpression Id. */
-  int INIT = 32;
+  int ENUM = 32;
   /** RegularExpression Id. */
-  int INOUT = 33;
+  int EXTENSION = 33;
   /** RegularExpression Id. */
-  int INTERNAL = 34;
+  int FUNC = 34;
   /** RegularExpression Id. */
-  int LET = 35;
+  int IMPORT = 35;
   /** RegularExpression Id. */
-  int OPERATOR = 36;
+  int INIT = 36;
   /** RegularExpression Id. */
-  int PRIVATE = 37;
+  int INOUT = 37;
   /** RegularExpression Id. */
-  int PUBLIC = 38;
+  int INTERNAL = 38;
   /** RegularExpression Id. */
-  int STATIC = 39;
+  int LET = 39;
   /** RegularExpression Id. */
-  int STRUCT = 40;
+  int OPERATOR = 40;
   /** RegularExpression Id. */
-  int SUBSCRIPT = 41;
+  int PRIVATE = 41;
   /** RegularExpression Id. */
-  int TYPEALIAS = 42;
+  int PUBLIC = 42;
   /** RegularExpression Id. */
-  int VAR = 43;
+  int STATIC = 43;
   /** RegularExpression Id. */
-  int BREAK = 44;
+  int STRUCT = 44;
   /** RegularExpression Id. */
-  int CASE = 45;
+  int SUBSCRIPT = 45;
   /** RegularExpression Id. */
-  int CONTINUE = 46;
+  int TYPEALIAS = 46;
   /** RegularExpression Id. */
-  int DEFAULT_KEYWORD = 47;
+  int VAR = 47;
   /** RegularExpression Id. */
-  int DO = 48;
+  int TERMINATOR = 48;
   /** RegularExpression Id. */
-  int ELSE = 49;
+  int SEPARATOR = 49;
   /** RegularExpression Id. */
-  int FALLTHROUGH = 50;
+  int BREAK = 50;
   /** RegularExpression Id. */
-  int FOR = 51;
+  int CASE = 51;
   /** RegularExpression Id. */
-  int IF = 52;
+  int CONTINUE = 52;
   /** RegularExpression Id. */
-  int IN = 53;
+  int DEFAULT_KEYWORD = 53;
   /** RegularExpression Id. */
-  int RETURN = 54;
+  int DO = 54;
   /** RegularExpression Id. */
-  int SWITCH = 55;
+  int ELSE = 55;
   /** RegularExpression Id. */
-  int WHERE = 56;
+  int FALLTHROUGH = 56;
   /** RegularExpression Id. */
-  int WHILE = 57;
+  int FOR = 57;
   /** RegularExpression Id. */
-  int K_I = 58;
+  int IF = 58;
   /** RegularExpression Id. */
-  int K_F = 59;
+  int IN = 59;
   /** RegularExpression Id. */
-  int PAR_I = 60;
+  int RETURN = 60;
   /** RegularExpression Id. */
-  int PAR_F = 61;
+  int SWITCH = 61;
   /** RegularExpression Id. */
-  int COR_I = 62;
+  int WHERE = 62;
   /** RegularExpression Id. */
-  int COR_F = 63;
+  int WHILE = 63;
   /** RegularExpression Id. */
-  int AS = 64;
+  int K_I = 64;
   /** RegularExpression Id. */
-  int CATCH = 65;
+  int K_F = 65;
   /** RegularExpression Id. */
-  int FALSE = 66;
+  int PAR_I = 66;
   /** RegularExpression Id. */
-  int IS = 67;
+  int PAR_F = 67;
   /** RegularExpression Id. */
-  int NIL = 68;
+  int COR_I = 68;
   /** RegularExpression Id. */
-  int RETHROWS = 69;
+  int COR_F = 69;
   /** RegularExpression Id. */
-  int SUPER = 70;
+  int AS = 70;
   /** RegularExpression Id. */
-  int SELF = 71;
+  int CATCH = 71;
   /** RegularExpression Id. */
-  int SELF_CAP = 72;
+  int FALSE = 72;
   /** RegularExpression Id. */
-  int THROW = 73;
+  int IS = 73;
   /** RegularExpression Id. */
-  int THROWS = 74;
+  int NIL = 74;
   /** RegularExpression Id. */
-  int TRUE = 75;
+  int RETHROWS = 75;
   /** RegularExpression Id. */
-  int TRY = 76;
+  int SUPER = 76;
   /** RegularExpression Id. */
-  int ASSOCIATIVITY = 77;
+  int SELF = 77;
   /** RegularExpression Id. */
-  int CONVENIENCE = 78;
+  int SELF_CAP = 78;
   /** RegularExpression Id. */
-  int DYNAMIC = 79;
+  int THROW = 79;
   /** RegularExpression Id. */
-  int DIDSET = 80;
+  int THROWS = 80;
   /** RegularExpression Id. */
-  int FINAL = 81;
+  int TRUE = 81;
   /** RegularExpression Id. */
-  int GET = 82;
+  int TRY = 82;
   /** RegularExpression Id. */
-  int INFIX = 83;
+  int ASSOCIATIVITY = 83;
   /** RegularExpression Id. */
-  int INDIRECT = 84;
+  int CONVENIENCE = 84;
   /** RegularExpression Id. */
-  int LAZY = 85;
+  int DYNAMIC = 85;
   /** RegularExpression Id. */
-  int LEFT = 86;
+  int DIDSET = 86;
   /** RegularExpression Id. */
-  int MUTATING = 87;
+  int FINAL = 87;
   /** RegularExpression Id. */
-  int NONE = 88;
+  int GET = 88;
   /** RegularExpression Id. */
-  int NONMUTATING = 89;
+  int INFIX = 89;
   /** RegularExpression Id. */
-  int OPTIONAL = 90;
+  int INDIRECT = 90;
   /** RegularExpression Id. */
-  int OVERRIDE = 91;
+  int LAZY = 91;
   /** RegularExpression Id. */
-  int POSTFIX = 92;
+  int LEFT = 92;
   /** RegularExpression Id. */
-  int PRECEDENCE = 93;
+  int MUTATING = 93;
   /** RegularExpression Id. */
-  int PREFIX = 94;
+  int NONE = 94;
   /** RegularExpression Id. */
-  int PROTOCOL = 95;
+  int NONMUTATING = 95;
   /** RegularExpression Id. */
-  int PROTOCOL_CAP = 96;
+  int OPTIONAL = 96;
   /** RegularExpression Id. */
-  int REQUIRED = 97;
+  int OVERRIDE = 97;
   /** RegularExpression Id. */
-  int RIGHT = 98;
+  int POSTFIX = 98;
   /** RegularExpression Id. */
-  int SET = 99;
+  int PRECEDENCE = 99;
   /** RegularExpression Id. */
-  int TYPE = 100;
+  int PREFIX = 100;
   /** RegularExpression Id. */
-  int UNOWNED = 101;
+  int PROTOCOL = 101;
   /** RegularExpression Id. */
-  int WEAK = 102;
+  int PROTOCOL_CAP = 102;
   /** RegularExpression Id. */
-  int WILLSET = 103;
+  int REQUIRED = 103;
   /** RegularExpression Id. */
-  int PRINT = 104;
+  int RIGHT = 104;
   /** RegularExpression Id. */
-  int IDENT = 105;
+  int SET = 105;
   /** RegularExpression Id. */
-  int ERROR = 106;
+  int TYPE = 106;
   /** RegularExpression Id. */
-  int ERROROPERA = 107;
+  int UNOWNED = 107;
+  /** RegularExpression Id. */
+  int WEAK = 108;
+  /** RegularExpression Id. */
+  int WILLSET = 109;
+  /** RegularExpression Id. */
+  int PRINT = 110;
+  /** RegularExpression Id. */
+  int READLINE = 111;
+  /** RegularExpression Id. */
+  int IDENT = 112;
+  /** RegularExpression Id. */
+  int ERROR = 113;
+  /** RegularExpression Id. */
+  int ERROROPERA = 114;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -228,6 +242,7 @@ public interface TurixConstants {
     "\"\\r\"",
     "\"\\n\"",
     "<NUM>",
+    "<STRING_LITERAL>",
     "\"+\"",
     "\"-\"",
     "\"*\"",
@@ -241,12 +256,15 @@ public interface TurixConstants {
     "\"Bool\"",
     "\"Character\"",
     "<LETTER>",
-    "<BOOLEANO_VAL>",
     "\"&&\"",
     "\"!\"",
     "\"||\"",
     "<REL_OP>",
     "\":\"",
+    "\"->\"",
+    "\"\\\"\"",
+    "\",\"",
+    "\"??\"",
     "\"=\"",
     "\"class\"",
     "\"deinit\"",
@@ -266,6 +284,8 @@ public interface TurixConstants {
     "\"subscript\"",
     "\"typealias\"",
     "\"var\"",
+    "\"terminator\"",
+    "\"separator\"",
     "\"break\"",
     "\"case\"",
     "\"continue\"",
@@ -327,6 +347,7 @@ public interface TurixConstants {
     "\"weak\"",
     "\"willSet\"",
     "\"print\"",
+    "\"readLine\"",
     "<IDENT>",
     "<ERROR>",
     "<ERROROPERA>",

@@ -12,6 +12,7 @@ public class TokenCase {
     public static String getTokenNombre(int tipo) {
         switch (tipo) {
             case TurixConstants.NUM: return "Número";
+            case TurixConstants.STRING_LITERAL: return "Cadena";
             case TurixConstants.MAS: return "Signo más";
             case TurixConstants.MENOS: return "Signo menos";
             case TurixConstants.DOUBLE: return "Double";
@@ -27,6 +28,9 @@ public class TokenCase {
             case TurixConstants.OR: return "Or";
             case TurixConstants.REL_OP: return "Operador Relacional";
             case TurixConstants.DOS_PUN: return "Dos Puntos";
+            case TurixConstants.FLECHA: return "Flecha";
+            case TurixConstants.COMILLA: return "Comillas";
+            case TurixConstants.COMA: return "Coma";
             case TurixConstants.IGUAL: return "Igual";
             case TurixConstants.CLASS: return "Class";
             case TurixConstants.DEINIT: return "Deint";
@@ -111,10 +115,13 @@ public class TokenCase {
             case TurixConstants.EOF: return "EOF";
             case TurixConstants.ERROR: return "ERROR";
             case TurixConstants.ERROROPERA: return "ERROR";
-            case TurixConstants.BOOLEANO_VAL: return "Valor booleano";
             case TurixConstants.MULTIPLICACION: return "Signo multiplicación";
             case TurixConstants.DIVISION: return "Signo división";
             case TurixConstants.MODULO: return "Signo módulo";
+            case TurixConstants.TERMINATOR: return "Terminator";
+            case TurixConstants.INTERROGACION: return "Signo de interrogación";
+            case TurixConstants.SEPARATOR: return "Separator";
+            case TurixConstants.READLINE: return "Lectura de linea";
             
             default: return "No registrado";
         }
