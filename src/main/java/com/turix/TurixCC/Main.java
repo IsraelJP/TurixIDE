@@ -9,18 +9,18 @@ import java.awt.event.ActionEvent;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-/** Misma clase y paquete: solo UI mejorada, sin cambiar tu lógica. */
 public class Main extends JFrame {
 
-    // Editor y consola
+    // Editor + salidas
     private final JTextArea inputArea  = new JTextArea(14, 80);
-    private final JTextArea outputArea = new JTextArea(10, 80);
+    private final JTextArea lexArea    = new JTextArea(10, 80);
+    private final JTextArea synArea    = new JTextArea(10, 80);
 
     // Estado
     private File currentFile = null;
     private final JLabel statusLabel = new JLabel("Listo");
 
-    // Acciones (para reusar en menú y toolbar)
+    // Acciones
     private final Action actOpen    = new AbstractAction("Abrir…")   { { putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control O")); }
         @Override public void actionPerformed(ActionEvent e){ onOpenFile(); } };
     private final Action actSaveAs  = new AbstractAction("Guardar…") { { putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S")); }
@@ -28,7 +28,11 @@ public class Main extends JFrame {
     private final Action actCompile = new AbstractAction("Compilar"){ { putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F5")); }
         @Override public void actionPerformed(ActionEvent e){ onEvaluate(e); } };
     private final Action actClearOut= new AbstractAction("Limpiar"){ { putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control L")); }
-        @Override public void actionPerformed(ActionEvent e){ outputArea.setText(""); setStatus("Consola limpiada"); } };
+        @Override public void actionPerformed(ActionEvent e){
+            lexArea.setText("");
+            synArea.setText("");
+            setStatus("Pantallas limpiadas");
+        } };
     private final Action actZoomIn  = new AbstractAction("Zoom +")   { { putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control EQUALS")); }
         @Override public void actionPerformed(ActionEvent e){ bumpFontSize(1); } };
     private final Action actZoomOut = new AbstractAction("Zoom -")   { { putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control MINUS")); }
@@ -37,52 +41,55 @@ public class Main extends JFrame {
         @Override public void actionPerformed(ActionEvent e){ dispose(); } };
 
     public Main() {
-        super("Calculadora Turix");
+        super("Compilador Turix");
 
         installNiceLookAndFeel();
-        tuneGlobalFonts(13); // tamaño base
+        tuneGlobalFonts(13);
 
-        // Áreas de texto: monoespaciadas y con márgenes
         Font mono = new Font(Font.MONOSPACED, Font.PLAIN, 14);
         inputArea.setFont(mono);
-        outputArea.setFont(mono);
         inputArea.setLineWrap(true);
         inputArea.setWrapStyleWord(true);
-        outputArea.setEditable(false);
         inputArea.setBorder(new EmptyBorder(8,8,8,8));
-        outputArea.setBorder(new EmptyBorder(8,8,8,8));
 
-        // Números de línea para el editor
+        lexArea.setFont(mono);
+        synArea.setFont(mono);
+        lexArea.setEditable(true);
+        synArea.setEditable(true);
+        lexArea.setBorder(new EmptyBorder(8,8,8,8));
+        synArea.setBorder(new EmptyBorder(8,8,8,8));
+
+        // Scrolls
         JScrollPane inputScroll = new JScrollPane(inputArea);
         inputScroll.setRowHeaderView(new LineNumberView(inputArea));
-        JScrollPane outputScroll = new JScrollPane(outputArea);
+        JScrollPane lexScroll = new JScrollPane(lexArea);
+        JScrollPane synScroll = new JScrollPane(synArea);
 
-        // Headers
-        JLabel inLabel  = styledLabel("Editor (una expresión por línea)");
-        JLabel outLabel = styledLabel("Consola");
+        // Tabs
+        JTabbedPane tabs = new JTabbedPane();
+        tabs.addTab("Léxico", lexScroll);
+        tabs.addTab("Sintáctico", synScroll);
 
+        // Editor panel
         JPanel editorPanel = new JPanel(new BorderLayout(6,6));
-        editorPanel.add(inLabel, BorderLayout.NORTH);
+       // Línea donde creas el label superior del editor:
+        editorPanel.add(styledLabel("Editor (programa completo; Ctrl+Enter para compilar)"), BorderLayout.NORTH);
+    
         editorPanel.add(inputScroll, BorderLayout.CENTER);
 
-        JPanel consolePanel = new JPanel(new BorderLayout(6,6));
-        consolePanel.add(outLabel, BorderLayout.NORTH);
-        consolePanel.add(outputScroll, BorderLayout.CENTER);
+        // Split
+        JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, editorPanel, tabs);
+        split.setResizeWeight(0.5);
 
-        // Split vertical: editor arriba, consola abajo
-        JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, editorPanel, consolePanel);
-        split.setResizeWeight(0.65);
-
-        // Menú + Toolbar + Status bar
+        // Menú + Toolbar + Status
         setJMenuBar(buildMenuBar());
         JToolBar toolbar = buildToolBar();
         JPanel statusBar = buildStatusBar();
 
-        // Atajos: Ctrl+Enter = compilar
+        // Atajo Ctrl+Enter
         inputArea.getInputMap().put(KeyStroke.getKeyStroke("ctrl ENTER"), "EVALUAR");
         inputArea.getActionMap().put("EVALUAR", actCompile);
 
-        // Layout root
         JPanel root = new JPanel(new BorderLayout(8,8));
         root.setBorder(new EmptyBorder(10,10,10,10));
         root.add(toolbar, BorderLayout.NORTH);
@@ -95,11 +102,10 @@ public class Main extends JFrame {
         setLocationRelativeTo(null);
     }
 
-    /* ---------- Look & Feel / Estilo ---------- */
+    /* ---------- Estilo ---------- */
 
     private void installNiceLookAndFeel() {
         try {
-            // Nimbus si está disponible; si no, sistema
             for (UIManager.LookAndFeelInfo laf : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(laf.getName())) {
                     UIManager.setLookAndFeel(laf.getClassName());
@@ -108,7 +114,6 @@ public class Main extends JFrame {
             }
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignore) {}
-        // Colores suaves para títulos
         UIManager.put("Label.foreground", new Color(30,30,30));
     }
 
@@ -148,7 +153,6 @@ public class Main extends JFrame {
         JButton b = new JButton(text);
         b.setToolTipText((String) action.getValue(Action.NAME));
         b.addActionListener(action);
-        b.putClientProperty("JButton.buttonType", "roundRect"); // algunos LAFs lo usan
         return b;
     }
 
@@ -182,7 +186,7 @@ public class Main extends JFrame {
         return bar;
     }
 
-    /* ---------- Acciones de Archivo / Compilar ---------- */
+    /* ---------- Archivo / Evaluar ---------- */
 
     private void onOpenFile() {
         JFileChooser chooser = new JFileChooser(currentFile != null ? currentFile.getParentFile() : null);
@@ -195,7 +199,7 @@ public class Main extends JFrame {
                 inputArea.setText(content);
                 inputArea.setCaretPosition(0);
                 currentFile = f;
-                setTitle("Calculadora Turix — " + f.getName());
+                setTitle("Compilador Turix — " + f.getName());
                 setStatus("Archivo cargado: " + f.getName());
             } catch (IOException ex) {
                 showError("No se pudo leer el archivo:\n" + ex.getMessage(), "Error al abrir");
@@ -213,7 +217,7 @@ public class Main extends JFrame {
             try {
                 writeFile(f, inputArea.getText());
                 currentFile = f;
-                setTitle("Calculadora Turix — " + f.getName());
+                setTitle("Compilador Turix — " + f.getName());
                 setStatus("Archivo guardado: " + f.getName());
             } catch (IOException ex) {
                 showError("No se pudo guardar el archivo:\n" + ex.getMessage(), "Error al guardar");
@@ -221,38 +225,66 @@ public class Main extends JFrame {
         }
     }
 
-    /** Compila/Evalúa el contenido del inputArea línea por línea y escribe en outputArea. */
-    private void onEvaluate(ActionEvent e) {
-        String text = inputArea.getText();
-        if (text == null || text.isBlank()) {
-            setStatus("Nada que compilar");
-            return;
-        }
-        outputArea.append("== Compilando/Analizando ==\n");
-        String[] lines = text.split("\\R");
-        int ok = 0, err = 0;
-        for (String line : lines) {
-            String expr = line.trim();
-            if (expr.isEmpty()) continue;
-            try {
-                Turix parser = new Turix(new java.io.StringReader(expr));
-                parser.Start(); // si Start() devuelve double, puedes imprimir el valor
-                outputArea.append(expr + "  ✔ Válida\n");
-                ok++;
-            } catch (ParseException pe) {
-                outputArea.append(expr + "  ✘ Sintaxis: " + pe.getMessage() + "\n");
-                err++;
-            } catch (TokenMgrError le) {
-                outputArea.append(expr + "  ✘ Léxico: " + le.getMessage() + "\n");
-                err++;
-            } catch (Exception ex) {
-                outputArea.append(expr + "  ✘ Error: " + ex.getMessage() + "\n");
-                err++;
+    /** Compila/Evalúa el contenido completo y separa errores en Léxico / Sintáctico. */
+private void onEvaluate(ActionEvent e) {
+    String text = inputArea.getText();
+    if (text == null || text.isBlank()) {
+        setStatus("Nada que compilar");
+        return;
+    }
+
+    lexArea.setText("== Análisis Léxico ==\n");
+    synArea.setText("== Análisis Sintáctico ==\n");
+
+    int erroresLex = 0;
+    int erroresSin = 0;
+
+    // ---------- LÉXICO (sobre TODO el texto) ----------
+    try {
+        SimpleCharStream scsLex = new SimpleCharStream(new StringReader(text), 1, 1);
+        TurixTokenManager lex = new TurixTokenManager(scsLex);
+        Token t;
+        while ((t = lex.getNextToken()).kind != TurixConstants.EOF) {
+            if (t.kind == TurixConstants.ERROR || t.kind == TurixConstants.ERROROPERA) {
+                lexArea.append(String.format(
+                    "Línea %d, Col %d: '%s' ✘ Léxico: token inválido%n",
+                    t.beginLine, t.beginColumn, t.image));
+                erroresLex++;
+            } else {
+                lexArea.append(String.format(
+                    "Línea %d, Col %d: Token %-18s => '%s'%n",
+                    t.beginLine, t.beginColumn, TokenCase.getTokenNombre(t.kind), t.image));
             }
         }
-        outputArea.append(String.format("-- Listo: %d OK, %d errores --%n%n", ok, err));
-        setStatus(String.format("Compilación terminada: %d OK, %d errores", ok, err));
+        if (erroresLex == 0) {
+            lexArea.append("✔ Sin errores léxicos\n");
+        }
+    } catch (TokenMgrError tme) {
+        lexArea.append("✘ Léxico: " + tme.getMessage() + "\n");
+        erroresLex++;
+    } catch (Exception ex) {
+        lexArea.append("✘ Léxico: " + ex.getMessage() + "\n");
+        erroresLex++;
     }
+
+    // ---------- SINTÁCTICO (sobre TODO el texto) ----------
+    try {
+        Turix parser = new Turix(new StringReader(text));
+        parser.Start();
+        synArea.append("✔ Programa válido\n");
+    } catch (ParseException pe) {
+        // El mensaje de JavaCC ya trae línea/columna; lo mostramos como “1 solo error sintáctico”
+        synArea.append("✘ Sintaxis: " + pe.getMessage() + "\n");
+        erroresSin++;
+    } catch (Exception ex) {
+        synArea.append("✘ Error: " + ex.getMessage() + "\n");
+        erroresSin++;
+    }
+
+    setStatus(String.format(
+        "Compilación terminada: %d errores léxicos, %d errores sintácticos",
+        erroresLex, erroresSin));
+}
 
     /* ---------- Utilidades ---------- */
 
@@ -273,7 +305,8 @@ public class Main extends JFrame {
 
     private void bumpFontSize(int delta) {
         changeAreaFont(inputArea, delta);
-        changeAreaFont(outputArea, delta);
+        changeAreaFont(lexArea, delta);
+        changeAreaFont(synArea, delta);
     }
 
     private void changeAreaFont(JTextArea area, int delta) {
@@ -286,9 +319,8 @@ public class Main extends JFrame {
         JOptionPane.showMessageDialog(this, msg, title, JOptionPane.ERROR_MESSAGE);
     }
 
-    /* ---------- Números de línea (simple) ---------- */
+    /* ---------- Números de línea ---------- */
 
-    /** Barra simple de números de línea para el JTextArea del editor. */
     static class LineNumberView extends JComponent {
         private final JTextArea textArea;
         private final Font font = new Font(Font.MONOSPACED, Font.PLAIN, 12);
@@ -324,7 +356,6 @@ public class Main extends JFrame {
             g.setColor(new Color(245,245,245));
             g.fillRect(clip.x, clip.y, clip.width, clip.height);
 
-            int base = textArea.getInsets().top;
             try {
                 int start = textArea.viewToModel2D(new Point(0, clip.y));
                 int end   = textArea.viewToModel2D(new Point(0, clip.y + clip.height));
@@ -346,7 +377,6 @@ public class Main extends JFrame {
     }
 
     public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (Exception ignore) {}
         SwingUtilities.invokeLater(() -> new Main().setVisible(true));
     }
 }
