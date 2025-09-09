@@ -195,6 +195,7 @@ void Sentencia() :
    | SentenciaRepeat()
    | Asignacion()
    | Switch()
+    
    
 }
 
@@ -203,13 +204,19 @@ void Sentencia() :
 void DeclaracionIF() :
 {}
 {
-    <IF> <PAR_I> Condicion() <PAR_F> <K_I> ListaSentencias() <K_F>
+    <IF> Condicion() <K_I> ListaSentencias() <K_F> (DecElse())?
+}
+
+void DecElse() :
+{}
+{
+    <ELSE> <K_I> ListaSentencias() <K_F>
 }
 
 void Condicion() :
 {}
 {
-    Exp() <REL_OP> Exp() ((<AND> | <OR> )  Exp() <REL_OP> Exp())*
+    Exp() <REL_OP> Exp() ((<AND> | <OR> | <NOT>)  Exp() <REL_OP> Exp())*
 }
 
 void DeclaracionVar() :
@@ -242,7 +249,8 @@ void Term() :
 {}
 {
       <NUM> | <IDENT>| <TRUE> | <FALSE>  | <STRING_LITERAL>
-      |<READLINE> <PAR_I> <PAR_F> | Tipo() <PAR_I> Exp() <PAR_F> | <PAR_I> <PAR_F> 
+      |<READLINE> <PAR_I> <PAR_F> | Tipo() <PAR_I> Exp() <PAR_F>  
+      |<PAR_I> (ListaExp())? <PAR_F>
 }
 
 void Func() :
@@ -326,3 +334,4 @@ void Case():
 {
     <CASE> <NUM> <DOS_PUN> ListaSentencias()
 }
+
