@@ -226,86 +226,95 @@ public class Main extends JFrame {
     }
 
     /** Compila/Evalúa el contenido completo y separa errores en Léxico / Sintáctico. */
-private void onEvaluate(ActionEvent e) {
-    String text = inputArea.getText();
-    if (text == null || text.isBlank()) {
-        setStatus("Nada que compilar");
-        return;
-    }
-
-    lexArea.setText("== Análisis Léxico ==\n");
-    synArea.setText("== Análisis Sintáctico ==\n");
-
-    int erroresLex = 0;
-    int erroresSin = 0;
-
-    // ---------- LÉXICO ----------
-    SimpleCharStream scsLex = new SimpleCharStream(new StringReader(text), 1, 1);
-    TurixTokenManager lex = new TurixTokenManager(scsLex);
-    Token t = null;
-    boolean finLex = false;
-
-    while (!finLex) {
-        try {
-            t = lex.getNextToken();
-            if (t.kind == TurixConstants.EOF) {
-                finLex = true;
-            } else if (t.kind == TurixConstants.ERROR || t.kind == TurixConstants.ERROROPERA) {
-                lexArea.append(String.format(
-                    "Línea %d, Col %d: '%s' ✘ Léxico: token inválido%n",
-                    t.beginLine, t.beginColumn, t.image));
-                erroresLex++;
-            } else {
-                lexArea.append(String.format(
-                    "Línea %d, Col %d: Token %-18s => '%s'%n",
-                    t.beginLine, t.beginColumn, TokenCase.getTokenNombre(t.kind), t.image));
-            }
-        } catch (TokenMgrError tme) {
-            lexArea.append("✘ Léxico: " + tme.getMessage() + "\n");
-            erroresLex++;
-            // Intentamos consumir un carácter y continuar
-            try {
-                scsLex.readChar();
-            } catch (Exception ex) {
-                finLex = true; // Si ya no hay más caracteres, terminamos
-            }
+    private void onEvaluate(ActionEvent e) {
+        String text = inputArea.getText();
+        if (text == null || text.isBlank()) {
+            setStatus("Nada que compilar");
+            return;
         }
-    }
 
-    if (erroresLex == 0) {
-        lexArea.append("✔ Sin errores léxicos\n");
-    }
+        lexArea.setText("== Análisis Léxico ==\n");
+        synArea.setText("== Análisis Sintáctico ==\n");
 
-    // ---------- SINTÁCTICO ----------
+        int erroresLex = 0;
+        int erroresSin = 0;
+
+        // ---------- LÉXICO ----------
+        SimpleCharStream scsLex = new SimpleCharStream(new StringReader(text), 1, 1);
+TurixTokenManager lex = new TurixTokenManager(scsLex);
+
+Token t = null;
+
+
+while (true) {
     try {
-        Turix parser = new Turix(new StringReader(text));
-        boolean continuar = true;
-        while (continuar) {
-            try {
-                parser.Start();
-                continuar = false; // Si terminó sin excepción, salimos
-                synArea.append("✔ Programa válido\n");
-            } catch (ParseException pe) {
-                synArea.append("✘ Sintaxis: " + pe.getMessage() + "\n");
-                erroresSin++;
-                // Avanzamos el parser un token para intentar seguir
-                Token next = parser.getToken(1); // obtiene el siguiente token
-                if (next.kind == TurixConstants.EOF) {
-                    continuar = false;
-                } else {
-                    parser.token = next; // colocamos el parser un token adelante
-                }
-            }
-        }
-    } catch (Exception ex) {
-        synArea.append("✘ Error: " + ex.getMessage() + "\n");
-        erroresSin++;
-    }
+        t = lex.getNextToken();
+        if (t.kind == TurixConstants.EOF) break;
 
-    setStatus(String.format(
-        "Compilación terminada: %d errores léxicos, %d errores sintácticos",
-        erroresLex, erroresSin));
+        // Aquí mostramos tokens válidos
+        lexArea.append(String.format(
+            "Línea %d, Col %d: Token %-18s => '%s'%n",
+            t.beginLine, t.beginColumn, TokenCase.getTokenNombre(t.kind), t.image
+        ));
+
+    } catch (TokenMgrError tme) {
+        // Capturamos el error léxico
+        erroresLex++;
+        lexArea.append("✘ Léxico: " + tme.getMessage() + "\n");
+
+        // Avanzamos un carácter para continuar
+        try { scsLex.readChar(); } catch (IOException ex) { break; }
+    }
 }
+
+if (erroresLex == 0) {
+    lexArea.append("✔ Sin errores léxicos\n");
+} else {
+    lexArea.append(String.format("✘ Total de errores léxicos: %d%n", erroresLex));
+}
+
+
+        // ---------- SINTÁCTICO ----------
+        try {
+            Turix parser = new Turix(new StringReader(text));
+            boolean continuar = true;
+            while (continuar) {
+                try {
+                    parser.Start();
+                    continuar = false; // Si terminó sin excepción, salimos
+                    synArea.append("✔ Programa válido\n");
+                } catch (ParseException pe) {
+                    synArea.append("✘ Sintaxis: " + pe.getMessage() + "\n");
+                    erroresSin++;
+                    // Avanzamos el parser un token para intentar seguir
+                    Token next = parser.getToken(1); // obtiene el siguiente token
+                    if (next.kind == TurixConstants.EOF) {
+                        continuar = false;
+                    } else {
+                        parser.token = next; // colocamos el parser un token adelante
+                    }
+                } catch (TokenMgrError tme) {
+        
+
+        // Avanzamos un carácter para continuar
+        try { scsLex.readChar(); } catch (IOException ex) { break; }
+    }
+            }
+            System.out.println("Se atoro");
+        } catch (Exception ex) {
+            synArea.append("✘ Error: " + ex.getMessage() + "\n");
+            erroresSin++;
+        }
+        if (erroresSin == 0) {
+    lexArea.append("✔ Sin errores Sintáticos\n");
+} else {
+    lexArea.append(String.format("✘ Total de errores sintáticos: %d%n", erroresSin));
+}
+
+        setStatus(String.format(
+            "Compilación terminada: %d errores léxicos, %d errores sintácticos",
+            erroresLex, erroresSin));
+    }
 
 
     /* ---------- Utilidades ---------- */
