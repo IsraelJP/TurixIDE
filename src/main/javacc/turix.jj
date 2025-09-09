@@ -195,6 +195,7 @@ void Sentencia() :
    | SentenciaRepeat()
    | Asignacion()
    | Switch()
+   | SentenciaWhile()
     
    
 }
@@ -335,3 +336,8 @@ void Case():
     <CASE> <NUM> <DOS_PUN> ListaSentencias()
 }
 
+void SentenciaWhile() :
+{}
+{
+    <WHILE> Condicion() <K_I> ListaSentencias() <K_F>
+}
