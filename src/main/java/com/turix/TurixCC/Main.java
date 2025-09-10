@@ -275,7 +275,6 @@ private void onEvaluate(ActionEvent e) {
             try {
                 parser.Start(); // intentamos parsear
                 continuar = false;
-                synArea.append("✔ Programa válido\n");
             } catch (ParseException pe) {
                 erroresSin++;
                 synArea.append("✘ Sintaxis: " + pe.getMessage() + "\n");

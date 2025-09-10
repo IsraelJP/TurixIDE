@@ -217,7 +217,7 @@ void DecElse() :
 void Condicion() :
 {}
 {
-    Exp() <REL_OP> Exp() ((<AND> | <OR> | <NOT>)  Exp() <REL_OP> Exp())*
+   ( Exp() (<REL_OP> Exp() ((<AND> | <OR> | <NOT>)  Exp() <REL_OP> Exp())* )? ) | ListaLet()
 }
 
 void DeclaracionVar() :
@@ -238,11 +238,15 @@ void Tipo() :
 {
     <INT> | <UINT> | <FLOAT> | <STRING> | <BOOL> | <DOUBLE>
 }
-
+void Operadores():
+{}
+{
+<MAS> | <MENOS> | <MULTIPLICACION> | <DIVISION> | <MODULO>
+}
 void Exp() :
 {}
 {
-   (<MENOS>)? Term() ( ( <MAS> | <MENOS> | <MULTIPLICACION> | <DIVISION> | <MODULO> ) Term() )*
+  (<MENOS>)? Term() ( (Operadores())? Term() )* 
 }
 
 
@@ -341,3 +345,10 @@ void SentenciaWhile() :
 {
     <WHILE> Condicion() <K_I> ListaSentencias() <K_F>
 }
+
+void ListaLet():
+{}
+{
+DeclaracionLet() (<COMA> DeclaracionLet())*
+}
+
