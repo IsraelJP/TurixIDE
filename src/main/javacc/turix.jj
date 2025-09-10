@@ -162,6 +162,11 @@ TOKEN : {
     // Funciones comunes
     | <PRINT: "print">
     | <READLINE: "readLine">
+    | <SQRT: "sqrt">  
+    | <POW: "pow">     
+    | <COS: "cos">     
+    | <SIN: "sin">     
+    | <LOG: "log"> 
 
     |< IDENT : "`" ( ["A"-"Z","a"-"z","0"-"9","_"] )+ "`"
        | ( ["A"-"Z","a"-"z","_"] ) ( ["A"-"Z","a"-"z","0"-"9","_"] )* >
@@ -195,6 +200,7 @@ void Sentencia() :
    | SentenciaRepeat()
    | Asignacion()
    | Switch()
+   | SentenciaWhile()
     
    
 }
@@ -325,13 +331,24 @@ void Asignacion():
 void Switch():
 {}
 {
-    (<SWITCH> <IDENT> | <NUM> | Exp()) <K_I> Case() (Case())* (<DEFAULT_KEYWORD>)? <K_F>
+    <SWITCH> Exp() <K_I> (Case())* (DefaultCase())? <K_F>
 }
 
 
 void Case():
 {}
 {
-    <CASE> <NUM> <DOS_PUN> ListaSentencias()
+    <CASE> Exp() <DOS_PUN> ListaSentencias() 
 }
 
+void SentenciaWhile() :
+{}
+{
+    <WHILE> Condicion() <K_I> ListaSentencias() <K_F>
+}
+
+void DefaultCase():
+{} 
+{
+    <DEFAULT_KEYWORD> <DOS_PUN> ListaSentencias()
+}
