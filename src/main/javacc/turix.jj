@@ -198,6 +198,7 @@ void Sentencia() :
    | RetornoSentencia()
    | Imprimir()
    | SentenciaRepeat()
+   | LOOKAHEAD(2) LlamadoFunc()
    | Asignacion()
    | Switch()
    | SentenciaWhile()
@@ -246,21 +247,25 @@ void Tipo() :
 void Operadores():
 {}
 {
-<MAS> | <MENOS> | <MULTIPLICACION> | <DIVISION> | <MODULO>
+<MAS> | <MENOS> | <MULTIPLICACION> | <DIVISION> | <MODULO> 
 }
 void Exp() :
 {}
 {
-  (<MENOS>)? Term() ( (Operadores())? Term() )* 
+  (<MENOS>)? Term() ( (Operadores()) Term() )* 
 }
 
+void funcionesDefinidas():
+{}
+{
+ <SQRT> | <POW> |<COS>| <SIN>| <LOG>| <READLINE> 
+}
 
 void Term() :
 {}
 {
-      <NUM> | <IDENT>| <TRUE> | <FALSE>  | <STRING_LITERAL>
-      |<READLINE> <PAR_I> <PAR_F> | Tipo() <PAR_I> Exp() <PAR_F>  
-      |<PAR_I> (ListaExp())? <PAR_F>
+      <NUM> | LOOKAHEAD(2) LlamadoFunc() | LOOKAHEAD(2) ParametroLlamadaFun() |<IDENT>| <TRUE> | <FALSE>  | <STRING_LITERAL> 
+      
 }
 
 void Func() :
@@ -280,6 +285,7 @@ void Parametro() :
 {
    <IDENT> <DOS_PUN> Tipo()
 }
+
 
 void Retorno() :
 {}
@@ -328,7 +334,7 @@ void SentenciaRepeat():
 void Asignacion():
 {}
 {
-    <IDENT> ( (<IGUAL> Exp()) | Term())
+    <IDENT> <IGUAL> Exp()
 }
 
 
@@ -362,3 +368,16 @@ void DefaultCase():
 {
     <DEFAULT_KEYWORD> <DOS_PUN> ListaSentencias()
 }
+
+void LlamadoFunc():
+{}
+{
+(<IDENT> |funcionesDefinidas() |Tipo()) <PAR_I> (ListaExp())? <PAR_F>
+}
+
+void ParametroLlamadaFun():
+{}
+{
+<IDENT> <DOS_PUN> Term()
+}
+
