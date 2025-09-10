@@ -198,6 +198,7 @@ void Sentencia() :
    | RetornoSentencia()
    | Imprimir()
    | SentenciaRepeat()
+   | LOOKAHEAD(2) LlamadoFunc()
    | Asignacion()
    | Switch()
    | SentenciaWhile()
@@ -222,7 +223,7 @@ void DecElse() :
 void Condicion() :
 {}
 {
-    Exp() <REL_OP> Exp() ((<AND> | <OR> | <NOT>)  Exp() <REL_OP> Exp())*
+   ( Exp() (<REL_OP> Exp() ((<AND> | <OR> | <NOT>)  Exp() <REL_OP> Exp())* )? ) | ListaLet()
 }
 
 void DeclaracionVar() :
@@ -243,20 +244,28 @@ void Tipo() :
 {
     <INT> | <UINT> | <FLOAT> | <STRING> | <BOOL> | <DOUBLE>
 }
-
+void Operadores():
+{}
+{
+<MAS> | <MENOS> | <MULTIPLICACION> | <DIVISION> | <MODULO> 
+}
 void Exp() :
 {}
 {
-   (<MENOS>)? Term() ( ( <MAS> | <MENOS> | <MULTIPLICACION> | <DIVISION> | <MODULO> ) Term() )*
+  (<MENOS>)? Term() ( (Operadores()) Term() )* 
 }
 
+void funcionesDefinidas():
+{}
+{
+ <SQRT> | <POW> |<COS>| <SIN>| <LOG>| <READLINE> 
+}
 
 void Term() :
 {}
 {
-      <NUM> | <IDENT>| <TRUE> | <FALSE>  | <STRING_LITERAL>
-      |<READLINE> <PAR_I> <PAR_F> | Tipo() <PAR_I> Exp() <PAR_F>  
-      |<PAR_I> (ListaExp())? <PAR_F>
+      <NUM> | LOOKAHEAD(2) LlamadoFunc() | LOOKAHEAD(2) ParametroLlamadaFun() |<IDENT>| <TRUE> | <FALSE>  | <STRING_LITERAL> 
+      
 }
 
 void Func() :
@@ -276,6 +285,7 @@ void Parametro() :
 {
    <IDENT> <DOS_PUN> Tipo()
 }
+
 
 void Retorno() :
 {}
@@ -324,7 +334,7 @@ void SentenciaRepeat():
 void Asignacion():
 {}
 {
-    <IDENT> ( (<IGUAL> Exp()) | Term())
+    <IDENT> <IGUAL> Exp()
 }
 
 
@@ -347,8 +357,27 @@ void SentenciaWhile() :
     <WHILE> Condicion() <K_I> ListaSentencias() <K_F>
 }
 
+void ListaLet():
+{}
+{
+DeclaracionLet() (<COMA> DeclaracionLet())*
+}
+
 void DefaultCase():
 {} 
 {
     <DEFAULT_KEYWORD> <DOS_PUN> ListaSentencias()
 }
+
+void LlamadoFunc():
+{}
+{
+(<IDENT> |funcionesDefinidas() |Tipo()) <PAR_I> (ListaExp())? <PAR_F>
+}
+
+void ParametroLlamadaFun():
+{}
+{
+<IDENT> <DOS_PUN> Term()
+}
+

@@ -223,13 +223,23 @@ public interface TurixConstants {
   /** RegularExpression Id. */
   int READLINE = 110;
   /** RegularExpression Id. */
-  int IDENT = 111;
+  int SQRT = 111;
   /** RegularExpression Id. */
-  int LETTER = 112;
+  int POW = 112;
   /** RegularExpression Id. */
-  int ERROR = 113;
+  int COS = 113;
   /** RegularExpression Id. */
-  int ERROROPERA = 114;
+  int SIN = 114;
+  /** RegularExpression Id. */
+  int LOG = 115;
+  /** RegularExpression Id. */
+  int IDENT = 116;
+  /** RegularExpression Id. */
+  int LETTER = 117;
+  /** RegularExpression Id. */
+  int ERROR = 118;
+  /** RegularExpression Id. */
+  int ERROROPERA = 119;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -347,6 +357,11 @@ public interface TurixConstants {
     "\"willSet\"",
     "\"print\"",
     "\"readLine\"",
+    "\"sqrt\"",
+    "\"pow\"",
+    "\"cos\"",
+    "\"sin\"",
+    "\"log\"",
     "<IDENT>",
     "<LETTER>",
     "<ERROR>",
