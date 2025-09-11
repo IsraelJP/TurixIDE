@@ -211,7 +211,7 @@ void Sentencia() :
 void DeclaracionIF() :
 {}
 {
-    <IF> Condicion() <K_I> ListaSentencias() <K_F> (DecElse())?
+    <IF> Condicion() <K_I> ListaSentencias() <K_F> (LOOKAHEAD(2) DecElse()| LOOKAHEAD(2) ElseIf())?
 }
 
 void DecElse() :
