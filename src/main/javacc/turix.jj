@@ -162,6 +162,11 @@ TOKEN : {
     // Funciones comunes
     | <PRINT: "print">
     | <READLINE: "readLine">
+    | <SQRT: "sqrt">  
+    | <POW: "pow">     
+    | <COS: "cos">     
+    | <SIN: "sin">     
+    | <LOG: "log"> 
 
     |< IDENT : "`" ( ["A"-"Z","a"-"z","0"-"9","_"] )+ "`"
        | ( ["A"-"Z","a"-"z","_"] ) ( ["A"-"Z","a"-"z","0"-"9","_"] )* >
@@ -193,8 +198,11 @@ void Sentencia() :
    | RetornoSentencia()
    | Imprimir()
    | SentenciaRepeat()
+   | LOOKAHEAD(2) LlamadoFunc()
    | Asignacion()
    | Switch()
+   | SentenciaWhile()
+    
    
 }
 
@@ -203,13 +211,30 @@ void Sentencia() :
 void DeclaracionIF() :
 {}
 {
-    <IF> <PAR_I> Condicion() <PAR_F> <K_I> ListaSentencias() <K_F>
+    <IF> Condicion() <K_I> ListaSentencias() <K_F> (LOOKAHEAD(2) DecElse()| LOOKAHEAD(2) ElseIf())?
+}
+
+void DecElse() :
+{}
+{
+    <ELSE> <K_I> ListaSentencias() <K_F>
+}
+void ElseIf():
+{}
+{
+     <ELSE> <IF> Condicion() <K_I> ListaSentencias() <K_F> (LOOKAHEAD(2) DecElse()| LOOKAHEAD(2) ElseIf())?
 }
 
 void Condicion() :
 {}
 {
-    Exp() <REL_OP> Exp() ((<AND> | <OR> )  Exp() <REL_OP> Exp())*
+   ( Exp() (<REL_OP> Exp() ((<AND> | <OR> | <NOT>)  (CondicionAnidada()|Exp()) (<REL_OP> Exp())?)* )? ) | ListaLet()
+}
+
+void CondicionAnidada(): 
+{}
+{
+<PAR_I> Condicion() <PAR_F>
 }
 
 void DeclaracionVar() :
@@ -230,19 +255,28 @@ void Tipo() :
 {
     <INT> | <UINT> | <FLOAT> | <STRING> | <BOOL> | <DOUBLE>
 }
-
+void Operadores():
+{}
+{
+<MAS> | <MENOS> | <MULTIPLICACION> | <DIVISION> | <MODULO> 
+}
 void Exp() :
 {}
 {
-   (<MENOS>)? Term() ( ( <MAS> | <MENOS> | <MULTIPLICACION> | <DIVISION> | <MODULO> ) Term() )*
+  (<MENOS>)? Term() ( (Operadores()) (Term() | <PAR_I> Exp() <PAR_F>) )* 
 }
 
+void funcionesDefinidas():
+{}
+{
+ <SQRT> | <POW> |<COS>| <SIN>| <LOG>| <READLINE> 
+}
 
 void Term() :
 {}
 {
-      <NUM> | <IDENT>| <TRUE> | <FALSE>  | <STRING_LITERAL>
-      |<READLINE> <PAR_I> <PAR_F> | Tipo() <PAR_I> Exp() <PAR_F> | <PAR_I> <PAR_F> 
+      <NUM> | LOOKAHEAD(2) LlamadoFunc() | LOOKAHEAD(2) ParametroLlamadaFun() |<IDENT>| <TRUE> | <FALSE>  | <STRING_LITERAL> 
+      
 }
 
 void Func() :
@@ -262,6 +296,7 @@ void Parametro() :
 {
    <IDENT> <DOS_PUN> Tipo()
 }
+
 
 void Retorno() :
 {}
@@ -310,19 +345,50 @@ void SentenciaRepeat():
 void Asignacion():
 {}
 {
-    <IDENT> ( (<IGUAL> Exp()) | Term())
+    <IDENT> <IGUAL> Exp()
 }
 
 
 void Switch():
 {}
 {
-    (<SWITCH> <IDENT> | <NUM> | Exp()) <K_I> Case() (Case())* (<DEFAULT_KEYWORD>)? <K_F>
+    <SWITCH> Exp() <K_I> (Case())* (DefaultCase())? <K_F>
 }
 
 
 void Case():
 {}
 {
-    <CASE> <NUM> <DOS_PUN> ListaSentencias()
+    <CASE> Exp() <DOS_PUN> ListaSentencias() 
 }
+
+void SentenciaWhile() :
+{}
+{
+    <WHILE> Condicion() <K_I> ListaSentencias() <K_F>
+}
+
+void ListaLet():
+{}
+{
+DeclaracionLet() (<COMA> DeclaracionLet())*
+}
+
+void DefaultCase():
+{} 
+{
+    <DEFAULT_KEYWORD> <DOS_PUN> ListaSentencias()
+}
+
+void LlamadoFunc():
+{}
+{
+(<IDENT> |funcionesDefinidas() |Tipo()) <PAR_I> (ListaExp())? <PAR_F>
+}
+
+void ParametroLlamadaFun():
+{}
+{
+<IDENT> <DOS_PUN> Term()
+}
+
