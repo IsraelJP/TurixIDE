@@ -219,11 +219,22 @@ void DecElse() :
 {
     <ELSE> <K_I> ListaSentencias() <K_F>
 }
+void ElseIf():
+{}
+{
+     <ELSE> <IF> Condicion() <K_I> ListaSentencias() <K_F> (LOOKAHEAD(2) DecElse()| LOOKAHEAD(2) ElseIf())?
+}
 
 void Condicion() :
 {}
 {
-   ( Exp() (<REL_OP> Exp() ((<AND> | <OR> | <NOT>)  Exp() <REL_OP> Exp())* )? ) | ListaLet()
+   ( Exp() (<REL_OP> Exp() ((<AND> | <OR> | <NOT>)  (CondicionAnidada()|Exp()) (<REL_OP> Exp())?)* )? ) | ListaLet()
+}
+
+void CondicionAnidada(): 
+{}
+{
+<PAR_I> Condicion() <PAR_F>
 }
 
 void DeclaracionVar() :
@@ -252,7 +263,7 @@ void Operadores():
 void Exp() :
 {}
 {
-  (<MENOS>)? Term() ( (Operadores()) Term() )* 
+  (<MENOS>)? Term() ( (Operadores()) (Term() | <PAR_I> Exp() <PAR_F>) )* 
 }
 
 void funcionesDefinidas():
