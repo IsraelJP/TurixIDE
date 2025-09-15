@@ -246,22 +246,32 @@ private void onEvaluate(ActionEvent e) {
     Token t = null;
 
     while (true) {
-        try {
-            t = lex.getNextToken();
-            if (t.kind == TurixConstants.EOF) break;
+    try {
+        t = lex.getNextToken();
+        if (t.kind == TurixConstants.EOF) break;
 
-            // Solo mostramos tokens válidos
-            lexArea.append(String.format(
-                "Línea %d, Col %d: Token %-18s => '%s'%n",
-                t.beginLine, t.beginColumn, TokenCase.getTokenNombre(t.kind), t.image
-            ));
-
-        } catch (TokenMgrError tme) {
+        if (t.kind == TurixConstants.ERROR_IDENT || t.kind == TurixConstants.ERROR_IDENT || t.kind == TurixConstants.ERROROPERA
+                || t.kind == TurixConstants.ERROR) {
             erroresLex++;
-            lexArea.append("✘ Léxico: " + tme.getMessage() + "\n");
-            try { scsLex.readChar(); } catch (IOException ex) { break; } // avanza para continuar
+            lexArea.append(String.format(
+                "✘ Léxico: Error en la línea %d, col %d. Token inválido => '%s'%n",
+                t.beginLine, t.beginColumn, t.image
+            ));
+            continue; // no lo mostramos como token válido
         }
+
+        // Solo mostramos tokens válidos
+        lexArea.append(String.format(
+            "Línea %d, Col %d: Token %-18s => '%s'%n",
+            t.beginLine, t.beginColumn, TokenCase.getTokenNombre(t.kind), t.image
+        ));
+
+    } catch (TokenMgrError tme) {
+        erroresLex++;
+        lexArea.append("✘ Léxico: " + tme.getMessage() + "\n");
+        try { scsLex.readChar(); } catch (IOException ex) { break; }
     }
+}
 
     if (erroresLex == 0) lexArea.append("✔ Sin errores léxicos\n");
     else lexArea.append(String.format("✘ Total de errores léxicos: %d%n", erroresLex));

@@ -240,6 +240,8 @@ public interface TurixConstants {
   int ERROR = 118;
   /** RegularExpression Id. */
   int ERROROPERA = 119;
+  /** RegularExpression Id. */
+  int ERROR_IDENT = 120;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -366,6 +368,7 @@ public interface TurixConstants {
     "<LETTER>",
     "<ERROR>",
     "<ERROROPERA>",
+    "<ERROR_IDENT>",
   };
 
 }
