@@ -15,6 +15,7 @@ public class Main extends JFrame {
     private final JTextArea inputArea  = new JTextArea(14, 80);
     private final JTextArea lexArea    = new JTextArea(10, 80);
     private final JTextArea synArea    = new JTextArea(10, 80);
+    private final JTextArea semArea    = new JTextArea(10, 80);
 
     // Estado
     private File currentFile = null;
@@ -54,22 +55,25 @@ public class Main extends JFrame {
 
         lexArea.setFont(mono);
         synArea.setFont(mono);
+        semArea.setFont(mono);
         lexArea.setEditable(true);
         synArea.setEditable(true);
+        semArea.setEditable(true);
         lexArea.setBorder(new EmptyBorder(8,8,8,8));
         synArea.setBorder(new EmptyBorder(8,8,8,8));
-
+        semArea.setBorder(new EmptyBorder(8,8,8,8));
         // Scrolls
         JScrollPane inputScroll = new JScrollPane(inputArea);
         inputScroll.setRowHeaderView(new LineNumberView(inputArea));
         JScrollPane lexScroll = new JScrollPane(lexArea);
         JScrollPane synScroll = new JScrollPane(synArea);
+        JScrollPane semScroll = new JScrollPane(semArea);
 
         // Tabs
         JTabbedPane tabs = new JTabbedPane();
         tabs.addTab("Léxico", lexScroll);
         tabs.addTab("Sintáctico", synScroll);
-
+        tabs.addTab("Semántico", semScroll);
         // Editor panel
         JPanel editorPanel = new JPanel(new BorderLayout(6,6));
        // Línea donde creas el label superior del editor:
@@ -338,6 +342,7 @@ public class Main extends JFrame {
         changeAreaFont(inputArea, delta);
         changeAreaFont(lexArea, delta);
         changeAreaFont(synArea, delta);
+        changeAreaFont(semArea, delta);
     }
 
     private void changeAreaFont(JTextArea area, int delta) {
