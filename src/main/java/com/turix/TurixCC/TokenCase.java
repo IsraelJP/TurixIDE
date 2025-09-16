@@ -12,12 +12,12 @@ public class TokenCase {
     public static String getTokenNombre(int tipo) {
         switch (tipo) {
             case TurixConstants.NUM: return "Número";
+            case TurixConstants.NUM_DEC: return "Número Decimal";
             case TurixConstants.STRING_LITERAL: return "Cadena";
             case TurixConstants.MAS: return "Signo más";
             case TurixConstants.MENOS: return "Signo menos";
             case TurixConstants.DOUBLE: return "Double";
             case TurixConstants.INT: return "Int";
-            case TurixConstants.UINT: return "UInt";
             case TurixConstants.FLOAT: return "Float";
             case TurixConstants.STRING: return "String";
             case TurixConstants.BOOL: return "Bool";

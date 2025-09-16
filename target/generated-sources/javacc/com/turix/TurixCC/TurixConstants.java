@@ -13,35 +13,35 @@ public interface TurixConstants {
   /** RegularExpression Id. */
   int NUM = 5;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 6;
+  int NUM_DEC = 6;
   /** RegularExpression Id. */
-  int MAS = 7;
+  int STRING_LITERAL = 7;
   /** RegularExpression Id. */
-  int MENOS = 8;
+  int MAS = 8;
   /** RegularExpression Id. */
-  int MULTIPLICACION = 9;
+  int MENOS = 9;
   /** RegularExpression Id. */
-  int DIVISION = 10;
+  int MULTIPLICACION = 10;
   /** RegularExpression Id. */
-  int MODULO = 11;
+  int DIVISION = 11;
   /** RegularExpression Id. */
-  int DOUBLE = 12;
+  int MODULO = 12;
   /** RegularExpression Id. */
-  int IGUAL = 13;
+  int DOUBLE = 13;
   /** RegularExpression Id. */
-  int SQRT = 14;
+  int IGUAL = 14;
   /** RegularExpression Id. */
-  int POW = 15;
+  int SQRT = 15;
   /** RegularExpression Id. */
-  int COS = 16;
+  int POW = 16;
   /** RegularExpression Id. */
-  int SIN = 17;
+  int COS = 17;
   /** RegularExpression Id. */
-  int LOG = 18;
+  int SIN = 18;
   /** RegularExpression Id. */
-  int INT = 19;
+  int LOG = 19;
   /** RegularExpression Id. */
-  int UINT = 20;
+  int INT = 20;
   /** RegularExpression Id. */
   int FLOAT = 21;
   /** RegularExpression Id. */
@@ -140,6 +140,7 @@ public interface TurixConstants {
     "\"\\r\"",
     "\"\\n\"",
     "<NUM>",
+    "<NUM_DEC>",
     "<STRING_LITERAL>",
     "\"+\"",
     "\"-\"",
@@ -154,7 +155,6 @@ public interface TurixConstants {
     "\"sin\"",
     "\"log\"",
     "\"Int\"",
-    "\"UInt\"",
     "\"Float\"",
     "\"String\"",
     "\"Bool\"",

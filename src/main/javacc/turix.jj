@@ -6,6 +6,7 @@ options {
 
 PARSER_BEGIN(Turix)
 package com.turix.TurixCC;
+import Semantico.*;
 
 public class Turix {
     public static void main(String[] args) throws ParseException {
@@ -27,7 +28,8 @@ SKIP : {
 
 TOKEN : {
     
-    < NUM:( ["0"-"9"] )+ ( "." (["0"-"9"])+ )? >
+    < NUM:( ["0"-"9"] )>
+    |< NUM_DEC:(( ["0"-"9"] )+ ( "." (["0"-"9"])+ ) )>
     |<STRING_LITERAL : 
         // String multilínea 
         "\"\"\"" (~["\""] | "\"" | "\"\"")* "\"\"\""
@@ -52,7 +54,6 @@ TOKEN : {
 
     //TIPOS DE DATO
     | <INT: "Int">
-    | <UINT: "UInt">
     | <FLOAT: "Float">
     | <STRING: "String">
     | <BOOL: "Bool">
@@ -136,7 +137,9 @@ TOKEN : {
 
 //CUERPO DEL PROGRAMA 
     void Start() :
-    {}
+    {
+        TokenAsignaciones.SetTables();
+    }
     {
         ListaSentencias() <EOF>
     }
@@ -267,7 +270,7 @@ TOKEN : {
     void Tipo() :
     {}
     {
-        <INT> | <UINT> | <FLOAT> | <STRING> | <BOOL> | <DOUBLE>
+        <INT> | <FLOAT> | <STRING> | <BOOL> | <DOUBLE>
     }
 
 //OPERADORES
@@ -365,7 +368,7 @@ TOKEN : {
     void Term() :
     {}
     {
-          <NUM> | LOOKAHEAD(2) LlamadoFunc() | LOOKAHEAD(2) ParametroLlamadaFun() |<IDENT>| <TRUE> | <FALSE>  | <STRING_LITERAL> 
+          <NUM>| <NUM_DEC> | LOOKAHEAD(2) LlamadoFunc() | LOOKAHEAD(2) ParametroLlamadaFun() |<IDENT>| <TRUE> | <FALSE>  | <STRING_LITERAL> 
 
     }
 
