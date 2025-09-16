@@ -122,6 +122,7 @@ public class TokenCase {
             case TurixConstants.INTERROGACION: return "Signo de interrogación";
             case TurixConstants.SEPARATOR: return "Separator";
             case TurixConstants.READLINE: return "Lectura de linea";
+            case TurixConstants.ERROR_IDENT: return "ERROR";
             
             default: return "No registrado";
         }

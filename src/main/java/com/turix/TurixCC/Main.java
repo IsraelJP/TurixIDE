@@ -15,6 +15,7 @@ public class Main extends JFrame {
     private final JTextArea inputArea  = new JTextArea(14, 80);
     private final JTextArea lexArea    = new JTextArea(10, 80);
     private final JTextArea synArea    = new JTextArea(10, 80);
+    private final JTextArea semArea    = new JTextArea(10, 80);
 
     // Estado
     private File currentFile = null;
@@ -54,22 +55,25 @@ public class Main extends JFrame {
 
         lexArea.setFont(mono);
         synArea.setFont(mono);
+        semArea.setFont(mono);
         lexArea.setEditable(true);
         synArea.setEditable(true);
+        semArea.setEditable(true);
         lexArea.setBorder(new EmptyBorder(8,8,8,8));
         synArea.setBorder(new EmptyBorder(8,8,8,8));
-
+        semArea.setBorder(new EmptyBorder(8,8,8,8));
         // Scrolls
         JScrollPane inputScroll = new JScrollPane(inputArea);
         inputScroll.setRowHeaderView(new LineNumberView(inputArea));
         JScrollPane lexScroll = new JScrollPane(lexArea);
         JScrollPane synScroll = new JScrollPane(synArea);
+        JScrollPane semScroll = new JScrollPane(semArea);
 
         // Tabs
         JTabbedPane tabs = new JTabbedPane();
         tabs.addTab("Léxico", lexScroll);
         tabs.addTab("Sintáctico", synScroll);
-
+        tabs.addTab("Semántico", semScroll);
         // Editor panel
         JPanel editorPanel = new JPanel(new BorderLayout(6,6));
        // Línea donde creas el label superior del editor:
@@ -226,29 +230,39 @@ public class Main extends JFrame {
     }
 
     /** Compila/Evalúa el contenido completo y separa errores en Léxico / Sintáctico. */
-private void onEvaluate(ActionEvent e) {
-    String text = inputArea.getText();
-    if (text == null || text.isBlank()) {
-        setStatus("Nada que compilar");
-        return;
-    }
+    private void onEvaluate(ActionEvent e) {
+        String text = inputArea.getText();
+        if (text == null || text.isBlank()) {
+            setStatus("Nada que compilar");
+            return;
+        }
 
-    lexArea.setText("== Análisis Léxico ==\n");
-    synArea.setText("== Análisis Sintáctico ==\n");
+        lexArea.setText("== Análisis Léxico ==\n");
+        synArea.setText("== Análisis Sintáctico ==\n");
 
-    int erroresLex = 0;
-    int erroresSin = 0;
+        int erroresLex = 0;
+        int erroresSin = 0;
 
-    // ---------- LÉXICO ----------
-    SimpleCharStream scsLex = new SimpleCharStream(new StringReader(text), 1, 1);
-    TurixTokenManager lex = new TurixTokenManager(scsLex);
+        // ---------- LÉXICO ----------
+        SimpleCharStream scsLex = new SimpleCharStream(new StringReader(text), 1, 1);
+        TurixTokenManager lex = new TurixTokenManager(scsLex);
 
-    Token t = null;
+        Token t = null;
 
-    while (true) {
+        while (true) {
         try {
             t = lex.getNextToken();
             if (t.kind == TurixConstants.EOF) break;
+
+            if (t.kind == TurixConstants.ERROR_IDENT || t.kind == TurixConstants.ERROR_IDENT || t.kind == TurixConstants.ERROROPERA
+                    || t.kind == TurixConstants.ERROR) {
+                erroresLex++;
+                lexArea.append(String.format(
+                    "✘ Léxico: Error en la línea %d, col %d. Token inválido => '%s'%n",
+                    t.beginLine, t.beginColumn, t.image
+                ));
+                continue; // no lo mostramos como token válido
+            }
 
             // Solo mostramos tokens válidos
             lexArea.append(String.format(
@@ -259,51 +273,51 @@ private void onEvaluate(ActionEvent e) {
         } catch (TokenMgrError tme) {
             erroresLex++;
             lexArea.append("✘ Léxico: " + tme.getMessage() + "\n");
-            try { scsLex.readChar(); } catch (IOException ex) { break; } // avanza para continuar
+            try { scsLex.readChar(); } catch (IOException ex) { break; }
         }
     }
 
-    if (erroresLex == 0) lexArea.append("✔ Sin errores léxicos\n");
-    else lexArea.append(String.format("✘ Total de errores léxicos: %d%n", erroresLex));
+        if (erroresLex == 0) lexArea.append("✔ Sin errores léxicos\n");
+        else lexArea.append(String.format("✘ Total de errores léxicos: %d%n", erroresLex));
 
-    // ---------- SINTÁCTICO ----------
-    try {
-        Turix parser = new Turix(new StringReader(text));
-        boolean continuar = true;
+        // ---------- SINTÁCTICO ----------
+        try {
+            Turix parser = new Turix(new StringReader(text));
+            boolean continuar = true;
 
-        while (continuar) {
-            try {
-                parser.Start(); // intentamos parsear
-                continuar = false;
-            } catch (ParseException pe) {
-                erroresSin++;
-                synArea.append("✘ Sintaxis: " + pe.getMessage() + "\n");
-
-                // Avanzamos un token para no quedar atrapados
-                Token next = parser.getToken(1); 
-                if (next.kind == TurixConstants.EOF) {
+            while (continuar) {
+                try {
+                    parser.Start(); // intentamos parsear
                     continuar = false;
-                } else {
-                    parser.token = parser.getToken(2);
+                } catch (ParseException pe) {
+                    erroresSin++;
+                    synArea.append("✘ Sintaxis: " + pe.getMessage() + "\n");
+
+                    // Avanzamos un token para no quedar atrapados
+                    Token next = parser.getToken(1); 
+                    if (next.kind == TurixConstants.EOF) {
+                        continuar = false;
+                    } else {
+                        parser.token = parser.getToken(2);
+                    }
+                } catch (TokenMgrError tme) {
+                    // Si el parser encuentra un error léxico dentro, avanzamos
+                    try { scsLex.readChar(); } catch (IOException ex) { continuar = false; }
                 }
-            } catch (TokenMgrError tme) {
-                // Si el parser encuentra un error léxico dentro, avanzamos
-                try { scsLex.readChar(); } catch (IOException ex) { continuar = false; }
             }
+
+        } catch (Exception ex) {
+            erroresSin++;
+            synArea.append("✘ Error inesperado: " + ex.getMessage() + "\n");
         }
 
-    } catch (Exception ex) {
-        erroresSin++;
-        synArea.append("✘ Error inesperado: " + ex.getMessage() + "\n");
+        if (erroresSin == 0) synArea.append("✔ Sin errores Sintácticos\n");
+        else synArea.append(String.format("✘ Total de errores sintácticos: %d%n", erroresSin));
+
+        setStatus(String.format(
+            "Compilación terminada: %d errores léxicos, %d errores sintácticos",
+            erroresLex, erroresSin));
     }
-
-    if (erroresSin == 0) synArea.append("✔ Sin errores Sintácticos\n");
-    else synArea.append(String.format("✘ Total de errores sintácticos: %d%n", erroresSin));
-
-    setStatus(String.format(
-        "Compilación terminada: %d errores léxicos, %d errores sintácticos",
-        erroresLex, erroresSin));
-}
 
 
 
@@ -328,6 +342,7 @@ private void onEvaluate(ActionEvent e) {
         changeAreaFont(inputArea, delta);
         changeAreaFont(lexArea, delta);
         changeAreaFont(synArea, delta);
+        changeAreaFont(semArea, delta);
     }
 
     private void changeAreaFont(JTextArea area, int delta) {
