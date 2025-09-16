@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import Semantico.*;
 
 public class Main extends JFrame {
 
@@ -239,7 +240,8 @@ public class Main extends JFrame {
 
         lexArea.setText("== Análisis Léxico ==\n");
         synArea.setText("== Análisis Sintáctico ==\n");
-
+        semArea.setText("== Análisis Semántico ==\n");
+        TokenAsignaciones.SetTables();
         int erroresLex = 0;
         int erroresSin = 0;
 
@@ -310,7 +312,23 @@ public class Main extends JFrame {
             erroresSin++;
             synArea.append("✘ Error inesperado: " + ex.getMessage() + "\n");
         }
-
+        //---------SEMÁNTICO-------
+        erroresSem.resetErrores(); // limpiar antes
+        try {
+            Turix parser = new Turix(new StringReader(text));
+            parser.Start(); 
+            } catch (Exception ex) {
+                // ya lo manejaste en sintaxis
+            }
+        if (erroresSem.getErrores().isEmpty()) {
+            semArea.append("✔ Sin errores semánticos\n");
+        } else {
+            for (String err :erroresSem.getErrores()) {
+                semArea.append("✘ Semántico: " + err + "\n");
+            }
+            semArea.append("✘ Total de errores semánticos: " +
+                           erroresSem.getErrores().size() + "\n");
+        }
         if (erroresSin == 0) synArea.append("✔ Sin errores Sintácticos\n");
         else synArea.append(String.format("✘ Total de errores sintácticos: %d%n", erroresSin));
 

@@ -6,6 +6,7 @@ com\turix\TurixCC\TurixTokenManager.class
 Semantico\TokenAsignaciones.class
 com\turix\TurixCC\Main$5.class
 com\turix\TurixCC\ParseException.class
+Semantico\erroresSem.class
 com\turix\TurixCC\TokenCase.class
 com\turix\TurixCC\Main$1.class
 com\turix\TurixCC\Main$7.class

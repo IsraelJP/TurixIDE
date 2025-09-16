@@ -260,13 +260,13 @@ public class Turix implements TurixConstants {
 }
 
 //VAR 
-  final public     void DeclaracionVar() throws ParseException {
+  final public     void DeclaracionVar() throws ParseException {Token id; Token tipo=null;
     jj_consume_token(VAR);
-    jj_consume_token(IDENT);
+    id = jj_consume_token(IDENT);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case DOS_PUN:{
       jj_consume_token(DOS_PUN);
-      Tipo();
+      tipo = Tipo();
       break;
       }
     default:
@@ -283,6 +283,7 @@ public class Turix implements TurixConstants {
       jj_la1[8] = jj_gen;
       ;
     }
+TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20);
 }
 
 //LET
@@ -330,10 +331,11 @@ public class Turix implements TurixConstants {
 }
 
 //ASIGNACION 
-  final public     void Asignacion() throws ParseException {
-    jj_consume_token(IDENT);
+  final public     void Asignacion() throws ParseException {Token izq; Token der;
+    izq = jj_consume_token(IDENT);
     jj_consume_token(IGUAL);
-    Exp();
+    der = Exp();
+TokenAsignaciones.checkAsing(izq, der);
 }
 
 //CONDICIONAL
@@ -461,26 +463,31 @@ public class Turix implements TurixConstants {
 }
 
 //Tipos de DATO
-  final public     void Tipo() throws ParseException {
+  final public     Token Tipo() throws ParseException {Token t = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case INT:{
-      jj_consume_token(INT);
+      t = jj_consume_token(INT);
+{if ("" != null) return t;}
       break;
       }
     case FLOAT:{
-      jj_consume_token(FLOAT);
+      t = jj_consume_token(FLOAT);
+{if ("" != null) return t;}
       break;
       }
     case STRING:{
-      jj_consume_token(STRING);
+      t = jj_consume_token(STRING);
+{if ("" != null) return t;}
       break;
       }
     case BOOL:{
-      jj_consume_token(BOOL);
+      t = jj_consume_token(BOOL);
+{if ("" != null) return t;}
       break;
       }
     case DOUBLE:{
-      jj_consume_token(DOUBLE);
+      t = jj_consume_token(DOUBLE);
+{if ("" != null) return t;}
       break;
       }
     default:
@@ -488,6 +495,7 @@ public class Turix implements TurixConstants {
       jj_consume_token(-1);
       throw new ParseException();
     }
+    throw new Error("Missing return statement in function");
 }
 
 //OPERADORES
@@ -781,61 +789,68 @@ public class Turix implements TurixConstants {
     }
 }
 
-  final public void Term() throws ParseException {
+  final public Token Term() throws ParseException {Token t = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case IDENT:{
+      t = jj_consume_token(IDENT);
+String msg = TokenAsignaciones.checkVariable(t);
+            if (!msg.equals(" ")) {
+                erroresSem.addError(msg);
+            }
+            {if ("" != null) return t;}
+      break;
+      }
     case NUM:{
-      jj_consume_token(NUM);
+      t = jj_consume_token(NUM);
+{if ("" != null) return t;}
       break;
       }
     case NUM_DEC:{
-      jj_consume_token(NUM_DEC);
+      t = jj_consume_token(NUM_DEC);
+{if ("" != null) return t;}
+      break;
+      }
+    case TRUE:{
+      t = jj_consume_token(TRUE);
+{if ("" != null) return t;}
+      break;
+      }
+    case FALSE:{
+      t = jj_consume_token(FALSE);
+{if ("" != null) return t;}
+      break;
+      }
+    case STRING_LITERAL:{
+      t = jj_consume_token(STRING_LITERAL);
+{if ("" != null) return t;}
       break;
       }
     default:
       jj_la1[30] = jj_gen;
       if (jj_2_6(2)) {
         LlamadoFunc();
-      } else if (jj_2_7(2)) {
-        ParametroLlamadaFun();
+{if ("" != null) return null;}
       } else {
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case IDENT:{
-          jj_consume_token(IDENT);
-          break;
-          }
-        case TRUE:{
-          jj_consume_token(TRUE);
-          break;
-          }
-        case FALSE:{
-          jj_consume_token(FALSE);
-          break;
-          }
-        case STRING_LITERAL:{
-          jj_consume_token(STRING_LITERAL);
-          break;
-          }
-        default:
-          jj_la1[31] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
-        }
+        jj_consume_token(-1);
+        throw new ParseException();
       }
     }
+    throw new Error("Missing return statement in function");
 }
 
 //EXPRESIONES
-  final public     void Exp() throws ParseException {
+  final public     Token Exp() throws ParseException {Token t = null;
+        Token temp = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case MENOS:{
       jj_consume_token(MENOS);
       break;
       }
     default:
-      jj_la1[32] = jj_gen;
+      jj_la1[31] = jj_gen;
       ;
     }
-    Term();
+    t = Term();
     label_8:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -848,7 +863,7 @@ public class Turix implements TurixConstants {
         break;
         }
       default:
-        jj_la1[33] = jj_gen;
+        jj_la1[32] = jj_gen;
         break label_8;
       }
       Operadores();
@@ -870,21 +885,25 @@ public class Turix implements TurixConstants {
       case FALSE:
       case TRUE:
       case IDENT:{
-        Term();
+        temp = Term();
         break;
         }
       case PAR_I:{
         jj_consume_token(PAR_I);
-        Exp();
+        temp = Exp();
         jj_consume_token(PAR_F);
         break;
         }
       default:
-        jj_la1[34] = jj_gen;
+        jj_la1[33] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
     }
+// devolvemos el primer token encontrado (t),
+            // si quieres ser más estricto podrías devolver temp (último usado)
+            {if ("" != null) return t;}
+    throw new Error("Missing return statement in function");
 }
 
   private boolean jj_2_1(int xla)
@@ -935,15 +954,46 @@ public class Turix implements TurixConstants {
     finally { jj_save(5, xla); }
   }
 
-  private boolean jj_2_7(int xla)
+  private boolean jj_3_2()
  {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return (!jj_3_7()); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(6, xla); }
+    if (jj_3R_DecElse_183_9_10()) return true;
+    return false;
   }
 
-  private boolean jj_3R_funcionesDefinidas_291_6_15()
+  private boolean jj_3_5()
+ {
+    if (jj_3R_ElseIf_188_10_11()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_LlamadoFunc_318_5_9()
+ {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(60)) {
+    jj_scanpos = xsp;
+    if (jj_3R_LlamadoFunc_318_15_12()) {
+    jj_scanpos = xsp;
+    if (jj_3R_LlamadoFunc_318_37_13()) return true;
+    }
+    }
+    if (jj_scan_token(PAR_I)) return true;
+    return false;
+  }
+
+  private boolean jj_3_1()
+ {
+    if (jj_3R_LlamadoFunc_318_5_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3_6()
+ {
+    if (jj_3R_LlamadoFunc_318_5_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_funcionesDefinidas_306_6_14()
  {
     Token xsp;
     xsp = jj_scanpos;
@@ -966,28 +1016,33 @@ public class Turix implements TurixConstants {
     return false;
   }
 
-  private boolean jj_3R_LlamadoFunc_303_15_13()
+  private boolean jj_3R_LlamadoFunc_318_37_13()
  {
-    if (jj_3R_funcionesDefinidas_291_6_15()) return true;
+    if (jj_3R_Tipo_283_7_15()) return true;
     return false;
   }
 
-  private boolean jj_3R_LlamadoFunc_303_37_14()
+  private boolean jj_3_3()
  {
-    if (jj_3R_Tipo_273_9_16()) return true;
+    if (jj_3R_ElseIf_188_10_11()) return true;
     return false;
   }
 
-  private boolean jj_3_7()
+  private boolean jj_3_4()
  {
-    if (jj_3R_ParametroLlamadaFun_309_5_12()) return true;
+    if (jj_3R_DecElse_183_9_10()) return true;
     return false;
   }
 
-  private boolean jj_3R_ParametroLlamadaFun_309_5_12()
+  private boolean jj_3R_Tipo_287_7_20()
  {
-    if (jj_scan_token(IDENT)) return true;
-    if (jj_scan_token(DOS_PUN)) return true;
+    if (jj_scan_token(DOUBLE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_286_7_19()
+ {
+    if (jj_scan_token(BOOL)) return true;
     return false;
   }
 
@@ -998,30 +1053,41 @@ public class Turix implements TurixConstants {
     return false;
   }
 
-  private boolean jj_3_1()
+  private boolean jj_3R_Tipo_285_7_18()
  {
-    if (jj_3R_LlamadoFunc_303_5_9()) return true;
+    if (jj_scan_token(STRING)) return true;
     return false;
   }
 
-  private boolean jj_3_6()
+  private boolean jj_3R_Tipo_284_7_17()
  {
-    if (jj_3R_LlamadoFunc_303_5_9()) return true;
+    if (jj_scan_token(FLOAT)) return true;
     return false;
   }
 
-  private boolean jj_3R_LlamadoFunc_303_5_9()
+  private boolean jj_3R_Tipo_283_7_15()
  {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_scan_token(60)) {
+    if (jj_3R_Tipo_283_7_16()) {
     jj_scanpos = xsp;
-    if (jj_3R_LlamadoFunc_303_15_13()) {
+    if (jj_3R_Tipo_284_7_17()) {
     jj_scanpos = xsp;
-    if (jj_3R_LlamadoFunc_303_37_14()) return true;
+    if (jj_3R_Tipo_285_7_18()) {
+    jj_scanpos = xsp;
+    if (jj_3R_Tipo_286_7_19()) {
+    jj_scanpos = xsp;
+    if (jj_3R_Tipo_287_7_20()) return true;
     }
     }
-    if (jj_scan_token(PAR_I)) return true;
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_283_7_16()
+ {
+    if (jj_scan_token(INT)) return true;
     return false;
   }
 
@@ -1032,47 +1098,9 @@ public class Turix implements TurixConstants {
     return false;
   }
 
-  private boolean jj_3R_Tipo_273_9_16()
+  private boolean jj_3R_LlamadoFunc_318_15_12()
  {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(20)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(21)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(22)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(23)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(13)) return true;
-    }
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3_3()
- {
-    if (jj_3R_ElseIf_188_10_11()) return true;
-    return false;
-  }
-
-  private boolean jj_3_2()
- {
-    if (jj_3R_DecElse_183_9_10()) return true;
-    return false;
-  }
-
-  private boolean jj_3_5()
- {
-    if (jj_3R_ElseIf_188_10_11()) return true;
-    return false;
-  }
-
-  private boolean jj_3_4()
- {
-    if (jj_3R_DecElse_183_9_10()) return true;
+    if (jj_3R_funcionesDefinidas_306_6_14()) return true;
     return false;
   }
 
@@ -1087,7 +1115,7 @@ public class Turix implements TurixConstants {
   private Token jj_scanpos, jj_lastpos;
   private int jj_la;
   private int jj_gen;
-  final private int[] jj_la1 = new int[35];
+  final private int[] jj_la1 = new int[34];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -1095,12 +1123,12 @@ public class Turix implements TurixConstants {
 	   jj_la1_init_1();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0xffa2e0,0x0,0xffa2e0,0x0,0x0,0x0,0x0,0x20000000,0x4000,0x20000000,0x4000,0x0,0xe000000,0xe000000,0xffa2e0,0x10000000,0x10000000,0xffa2e0,0xf02000,0x1f00,0xf8000,0x0,0x40000000,0xffa000,0xffa2e0,0x0,0xffa2e0,0x0,0x0,0x0,0x60,0x80,0x200,0x1f00,0xffa0e0,};
+	   jj_la1_0 = new int[] {0xffa2e0,0x0,0xffa2e0,0x0,0x0,0x0,0x0,0x20000000,0x4000,0x20000000,0x4000,0x0,0xe000000,0xe000000,0xffa2e0,0x10000000,0x10000000,0xffa2e0,0xf02000,0x1f00,0xf8000,0x0,0x40000000,0xffa000,0xffa2e0,0x0,0xffa2e0,0x0,0x0,0x0,0xe0,0x200,0x1f00,0xffa0e0,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x1c0b48ce,0x1484e,0x1c0a0080,0x1000,0x1000,0x200,0x400,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x1c400080,0x0,0x0,0x1c000084,0x0,0x0,0x80,0x10000000,0x0,0x10000080,0x1c000080,0x1,0x1c0000b0,0x30,0x1,0x1,0x0,0x1c000000,0x0,0x0,0x1c400080,};
+	   jj_la1_1 = new int[] {0x1c0b48ce,0x1484e,0x1c0a0080,0x1000,0x1000,0x200,0x400,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x1c400080,0x0,0x0,0x1c000084,0x0,0x0,0x80,0x10000000,0x0,0x10000080,0x1c000080,0x1,0x1c0000b0,0x30,0x1,0x1,0x1c000000,0x0,0x0,0x1c400080,};
 	}
-  final private JJCalls[] jj_2_rtns = new JJCalls[7];
+  final private JJCalls[] jj_2_rtns = new JJCalls[6];
   private boolean jj_rescan = false;
   private int jj_gc = 0;
 
@@ -1115,7 +1143,7 @@ public class Turix implements TurixConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 35; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 34; i++) jj_la1[i] = -1;
 	 for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1130,7 +1158,7 @@ public class Turix implements TurixConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 35; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 34; i++) jj_la1[i] = -1;
 	 for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1141,7 +1169,7 @@ public class Turix implements TurixConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 35; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 34; i++) jj_la1[i] = -1;
 	 for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1160,7 +1188,7 @@ public class Turix implements TurixConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 35; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 34; i++) jj_la1[i] = -1;
 	 for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1170,7 +1198,7 @@ public class Turix implements TurixConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 35; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 34; i++) jj_la1[i] = -1;
 	 for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1180,7 +1208,7 @@ public class Turix implements TurixConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 35; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 34; i++) jj_la1[i] = -1;
 	 for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1316,7 +1344,7 @@ public class Turix implements TurixConstants {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
 	 }
-	 for (int i = 0; i < 35; i++) {
+	 for (int i = 0; i < 34; i++) {
 	   if (jj_la1[i] == jj_gen) {
 		 for (int j = 0; j < 32; j++) {
 		   if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -1362,7 +1390,7 @@ public class Turix implements TurixConstants {
 
   private void jj_rescan_token() {
 	 jj_rescan = true;
-	 for (int i = 0; i < 7; i++) {
+	 for (int i = 0; i < 6; i++) {
 	   try {
 		 JJCalls p = jj_2_rtns[i];
 
@@ -1376,7 +1404,6 @@ public class Turix implements TurixConstants {
 			   case 3: jj_3_4(); break;
 			   case 4: jj_3_5(); break;
 			   case 5: jj_3_6(); break;
-			   case 6: jj_3_7(); break;
 			 }
 		   }
 		   p = p.next;

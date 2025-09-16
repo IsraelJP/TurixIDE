@@ -224,10 +224,14 @@ TOKEN : {
 
     //VAR 
     void DeclaracionVar() :
-    {}
+    { Token id; Token tipo=null; }
     {
-        <VAR> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> Exp() )?
+        <VAR> id=<IDENT> ( <DOS_PUN> tipo=Tipo() )? ( <IGUAL> Exp() )?
+        {
+            TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20);
+        }
     }
+
     
     //LET
     void DeclaracionLet() :
@@ -242,10 +246,14 @@ TOKEN : {
     }
     //ASIGNACION 
     void Asignacion():
-    {}
+    { Token izq; Token der; }
     {
-        <IDENT> <IGUAL> Exp()
+        izq=<IDENT> <IGUAL> der=Exp()
+        {
+            TokenAsignaciones.checkAsing(izq, der);
+        }
     }
+
 
 
 
@@ -267,11 +275,18 @@ TOKEN : {
 
 
 //Tipos de DATO
-    void Tipo() :
-    {}
-    {
-        <INT> | <FLOAT> | <STRING> | <BOOL> | <DOUBLE>
-    }
+    Token Tipo() :
+{
+    Token t = null;
+}
+{
+      t=<INT>      { return t; }
+    | t=<FLOAT>    { return t; }
+    | t=<STRING>   { return t; }
+    | t=<BOOL>     { return t; }
+    | t=<DOUBLE>   { return t; }
+}
+
 
 //OPERADORES
 
@@ -365,23 +380,40 @@ TOKEN : {
         Exp() (<COMA> Exp())*
     }
     
-    void Term() :
-    {}
+   Token Term() :
+    { Token t = null; }
     {
-          <NUM>| <NUM_DEC> | LOOKAHEAD(2) LlamadoFunc() | LOOKAHEAD(2) ParametroLlamadaFun() |<IDENT>| <TRUE> | <FALSE>  | <STRING_LITERAL> 
-
+        t=<IDENT> { 
+            String msg = TokenAsignaciones.checkVariable(t);
+            if (!msg.equals(" ")) {
+                erroresSem.addError(msg);
+            }
+            return t; 
+        }
+      | t=<NUM> { return t; }
+      | t=<NUM_DEC> { return t; }
+      | t=<TRUE> { return t; }
+      | t=<FALSE> { return t; }
+      | t=<STRING_LITERAL> { return t; }
+      | LOOKAHEAD(2) LlamadoFunc() { return null; }
     }
+
+
 
     //EXPRESIONES
-    void Exp() :
-    {}
+    Token Exp() :
     {
-      (<MENOS>)? Term() ( (Operadores()) (Term() | <PAR_I> Exp() <PAR_F>) )* 
+        Token t = null;
+        Token temp = null;
     }
-
-
-
-
-
-
+    {
+        ( <MENOS> )?
+        t=Term()
+        ( (Operadores()) (temp=Term() | <PAR_I> temp=Exp() <PAR_F>) )*
+        {
+            // devolvemos el primer token encontrado (t),
+            // si quieres ser más estricto podrías devolver temp (último usado)
+            return t;
+        }
+    }
 

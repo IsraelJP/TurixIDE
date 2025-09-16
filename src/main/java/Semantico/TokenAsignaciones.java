@@ -13,6 +13,9 @@ import java.util.Hashtable;
  * @author stare
  */
 public class TokenAsignaciones {
+    
+
+    
     //Tabla que almacena tokens
     private static Hashtable tabla=new Hashtable();
      //Listas
@@ -30,38 +33,104 @@ public class TokenAsignaciones {
     public static void SetTables(){
         //Inicialización de tablas, almacena el tipo de dato compatible
         
-        intComp.add(5);
-        intComp.add(19);
+        intComp.add(5); //Numero 1233
+        intComp.add(20);//int
         
-        decComp.add(5);
-        decComp.add(12);
-        decComp.add(19);
+        decComp.add(5);//Numero
+        decComp.add(6); //Decimal 12.3
+        decComp.add(13);//Double
         decComp.add(20);
-        decComp.add(20);
+        decComp.add(21);
         
-        strComp.add(6);
-        strComp.add(22);
-        strComp.add(24);
+        strComp.add(7); //String literal AHUNSNKJKS
+        strComp.add(22); //String 
+        strComp.add(24);//Char
         
-        boolComp.add(23);
-        boolComp.add(58);
-        boolComp.add(59);
+        boolComp.add(23);//Bool
+        boolComp.add(58); //False
+        boolComp.add(59);//True
         
     }
-    
-   /* public static String checkAsing(Token TokenIzq, Token TokenAsig){
+    //Token izquierdo es tipo
+    //Token der resultado
+    public static void checkAsing(Token TokenIzq, Token TokenAsig){
         //Variables para almacenar el tipo de dato del identificador 
         //y las asignaciones
         int tipoIdent1;
         int tipoIdent2 ;
         
-        if (TokenIzq.kind!=5){
+        //No se ha declarado
+        if (TokenIzq.kind!=5 && TokenIzq.kind!=6){
             try{
                 tipoIdent1=(Integer)tabla.get(TokenIzq.image);
             }catch(Exception e){
-                return "Error el identificador"+TokenIzq.image + "No ha sido declarado \r\Linea: "+TokenIzq.beginLine;
+                erroresSem.addError("Error el identificador"+TokenIzq.image + "No ha sido declarado \r\nLinea: "+TokenIzq.beginLine) ;
+                return; 
             }
         }
+        else{
+            tipoIdent1=0; 
+        }
+        //Identificador
+        if(TokenAsig.kind== 60){
+            try{
+                tipoIdent2=(Integer) tabla.get(TokenAsig.image);
+            }catch(Exception e){
+                erroresSem.addError("Error: El identificador "+TokenAsig.image+"No ha sido decladorano\r\nLinea: "+TokenIzq.beginLine) ;
+                return; 
+            
+            }
+            
+        }
+        else if (TokenAsig.kind== 5  || TokenAsig.kind== 6 || TokenAsig.kind== 22 || TokenAsig.kind==58 || TokenAsig.kind==59 ){
+            tipoIdent2=TokenAsig.kind;
+        }else{
+            tipoIdent2=0;
+        }
         
-    }*/
+        //INT: Verificar si es entero
+        if(tipoIdent1==20){
+            if(!intComp.contains(tipoIdent2)){
+             
+                   erroresSem.addError("Error: No se puede convertir "+TokenAsig.image+"a Entero \r\nLinea: "+TokenIzq.beginLine) ;
+                return;  
+            }
+        }
+        //DOUBLE: Verificar si es Double
+        else if(tipoIdent1==13){
+            if(!decComp.contains(tipoIdent2)){
+                   erroresSem.addError("Error: No se puede convertir "+TokenAsig.image+"a Decimal \r\nLinea: "+TokenIzq.beginLine) ;
+                return; 
+            }
+        }
+        //STRING: Verificar si es String
+        else if(tipoIdent1==22){
+            if(!decComp.contains(tipoIdent2)){
+                   erroresSem.addError( "Error: No se puede convertir "+TokenAsig.image+"a String \r\nLinea: "+TokenIzq.beginLine) ;
+                return; 
+            }
+        }
+        //STRING: Verificar si es Bool
+        else if(tipoIdent1==23){
+            if(!decComp.contains(tipoIdent2)){
+                   erroresSem.addError("Error: No se puede convertir "+TokenAsig.image+"a Booleano \r\nLinea: "+TokenIzq.beginLine) ;
+                return; 
+            }
+        }
+        else{
+            erroresSem.addError("El identificador "+TokenIzq.image +" no ha sido declarado "+" Linea: "+TokenIzq.beginLine) ;
+                return; 
+        }
+        
+    }
+    //Método que verifica un identificador ha sido declarado
+    public static String checkVariable(Token checkTok){
+        try{
+            int tipoIdent1=(Integer)tabla.get(checkTok.image);
+            return " ";
+        }catch(Exception e){
+            return "Error: El indentificador "+checkTok.image+"No ha sido declarado"+" Linea: "+checkTok.beginLine;
+        }
+    }
+
 }
