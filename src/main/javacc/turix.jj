@@ -26,7 +26,7 @@ SKIP : {
 }
 
 TOKEN : {
-     
+    
     < NUM:( ["0"-"9"] )+ ( "." (["0"-"9"])+ )? >
     |<STRING_LITERAL : 
         // String multilínea 
@@ -36,12 +36,21 @@ TOKEN : {
         "\"" ( "\\" | ~["\"","\\","\n","\r"] )* "\""
      >
      
+    //OPERADORES MATEMATICOS
     | < MAS: "+" >
     | < MENOS: "-" >    
-    |< MULTIPLICACION: "*" > 
+    | < MULTIPLICACION: "*" > 
     | < DIVISION: "/" > 
     | < MODULO: "%" > 
     | <DOUBLE: "Double">
+    | <IGUAL: "=">
+    | <SQRT: "sqrt">  
+    | <POW: "pow">     
+    | <COS: "cos">     
+    | <SIN: "sin">     
+    | <LOG: "log"> 
+
+    //TIPOS DE DATO
     | <INT: "Int">
     | <UINT: "UInt">
     | <FLOAT: "Float">
@@ -64,40 +73,23 @@ TOKEN : {
     |<FLECHA : "->">
     |<COMILLA : "\"">
     |<COMA : ",">
-    |<INTERROGACION : "??">
-
+    
 
     // Palabras reservadas para declaraciones
-    |<IGUAL: "=">
-    | <CLASS: "class">
-    | <DEINIT: "deinit">
-    | <ENUM: "enum">
-    | <EXTENSION: "extension">
     | <FUNC: "func">
-    | <IMPORT: "import">
-    | <INIT: "init">
-    | <INOUT: "inout">
-    | <INTERNAL: "internal">
     | <LET: "let">
-    | <OPERATOR: "operator">
-    | <PRIVATE: "private">
-    | <PUBLIC: "public">
-    | <STATIC: "static">
-    | <STRUCT: "struct">
-    | <SUBSCRIPT: "subscript">
-    | <TYPEALIAS: "typealias">
     | <VAR: "var">
     | <TERMINATOR: "terminator">
     | <SEPARATOR: "separator">
+    | <PRINT: "print">
+    | <READLINE: "readLine">
 
     // Palabras reservadas para control de flujo
     | <BREAK: "break">
     | <CASE: "case">
-    | <CONTINUE: "continue">
-    | <DEFAULT_KEYWORD: "default"> // Renombrado para evitar conflicto con estado léxico
+    | <DEFAULT_KEYWORD: "default"> 
     | <REPEAT: "repeat">
     | <ELSE: "else">
-    | <FALLTHROUGH: "fallthrough">
     | <FOR: "for">
     | <IF: "if">
     | <IN: "in">
@@ -116,279 +108,277 @@ TOKEN : {
 
 
     // Palabras reservadas para tipos y contexto
-    | <AS: "as">
-    | <CATCH: "catch">
+    
     | <FALSE: "false">
-    | <IS: "is">
-    | <NIL: "nil">
-    | <RETHROWS: "rethrows">
-    | <SUPER: "super">
-    | <SELF: "self">
-    | <SELF_CAP: "Self"> // Renombrado para evitar confusión
-    | <THROW: "throw">
-    | <THROWS: "throws">
     | <TRUE: "true">
-    | <TRY: "try">
 
-    // Palabras reservadas para modificadores y atributos
-    | <ASSOCIATIVITY: "associativity">
-    | <CONVENIENCE: "convenience">
-    | <DYNAMIC: "dynamic">
-    | <DIDSET: "didSet">
-    | <FINAL: "final">
-    | <GET: "get">
-    | <INFIX: "infix">
-    | <INDIRECT: "indirect">
-    | <LAZY: "lazy">
-    | <LEFT: "left">
-    | <MUTATING: "mutating">
-    | <NONE: "none">
-    | <NONMUTATING: "nonmutating">
-    | <OPTIONAL: "optional">
-    | <OVERRIDE: "override">
-    | <POSTFIX: "postfix">
-    | <PRECEDENCE: "precedence">
-    | <PREFIX: "prefix">
-    | <PROTOCOL: "protocol">
-    | <PROTOCOL_CAP: "Protocol"> // Diferenciamos "protocol" y "Protocol"
-    | <REQUIRED: "required">
-    | <RIGHT: "right">
-    | <SET: "set">
-    | <TYPE: "Type">
-    | <UNOWNED: "unowned">
-    | <WEAK: "weak">
-    | <WILLSET: "willSet">
-
-    // Funciones comunes
-    | <PRINT: "print">
-    | <READLINE: "readLine">
-    | <SQRT: "sqrt">  
-    | <POW: "pow">     
-    | <COS: "cos">     
-    | <SIN: "sin">     
-    | <LOG: "log"> 
-
-    |< IDENT : "`" ( ["A"-"Z","a"-"z","0"-"9","_"] )+ "`"
-       | ( ["A"-"Z","a"-"z","_"] ) ( ["A"-"Z","a"-"z","0"-"9","_"] )* >
-    | < LETTER: [ "A"-"Z", "a"-"z" ] >
+    //IDENTIFCADOR
+    | < IDENT : "`" ( ["A"-"Z","a"-"z","0"-"9","_"] )+ "`"
+    | ( ["A"-"Z","a"-"z","_"] ) ( ["A"-"Z","a"-"z","0"-"9","_"] )* >
+    
     //ERRORES
     | < ERROR: (["0"-"9"])+ ("." (["0"-"9"])+){2,} >
-     | < ERROROPERA:  "=!" | "=>" | "=<" >
+    | < ERROROPERA:  "=!" | "=>" | "=<" >
+    |< ERROR_IDENT :
+    (["A"-"Z","a"-"z","_"])(["A"-"Z","a"-"z","0"-"9","_"])*
+    (~["A"-"Z","a"-"z","0"-"9","_"," ","\t","\r","\n",
+      "!","\"","%","(",")","*","+",",","-","/",":",
+      "=","[","]","{","}","&","|","?",">","<"])
+    (["A"-"Z","a"-"z","0"-"9","_"])* |
+    
+    // Solo caracteres inválidos aislados
+    (~["A"-"Z","a"-"z","_"," ","\t","\r","\n",
+      "!","\"","%","(",")","*","+",",","-","/",":",
+      "=","[","]","{","}","&","|","?",">","<","0"-"9"])+
+>
+     
     }
 
-void Start() :
-{}
-{
-    ListaSentencias() <EOF>
-}
+//CUERPO DEL PROGRAMA 
+    void Start() :
+    {}
+    {
+        ListaSentencias() <EOF>
+    }
 
-void ListaSentencias() :
-{}
-{
-    ( Sentencia() )*
-}
+    void ListaSentencias() :
+    {}
+    {
+        ( Sentencia() )*
+    }
 
-void Sentencia() :
-{}
-{
-     DeclaracionVar()
-   | DeclaracionLet()
-   | DeclaracionIF()
-   | Func()
-   | RetornoSentencia()
-   | Imprimir()
-   | SentenciaRepeat()
-   | LOOKAHEAD(2) LlamadoFunc()
-   | Asignacion()
-   | Switch()
-   | SentenciaWhile()
+    void Sentencia() :
+    {}
+    {
+         DeclaracionVar()
+       | DeclaracionLet()
+       | DeclaracionIF()
+       | Func()
+       | RetornoSentencia()
+       | Imprimir()
+       | SentenciaRepeat()
+       | LOOKAHEAD(2) LlamadoFunc()
+       | Asignacion()
+       | Switch()
+       | SentenciaWhile()
+       | Exp()
+
+    }
+
+
+//Declaraciones
+    //IF
+    void DeclaracionIF() :
+    {}
+    {
+        <IF> Condicion() <K_I> ListaSentencias() <K_F> (LOOKAHEAD(2) DecElse()| LOOKAHEAD(2) ElseIf())?
+    }
+
+    void DecElse() :
+    {}
+    {
+        <ELSE> <K_I> ListaSentencias() <K_F>
+    }
+    void ElseIf():
+    {}
+    {
+         <ELSE> <IF> Condicion() <K_I> ListaSentencias() <K_F> (LOOKAHEAD(2) DecElse()| LOOKAHEAD(2) ElseIf())?
+    }
+
+    //SWITCH
+    void Switch():
+    {}
+    {
+        <SWITCH> Exp() <K_I> (Case())* (DefaultCase())? <K_F>
+    }
+    void Case():
+    {}
+    {
+        <CASE> Exp() <DOS_PUN> ListaSentencias() 
+    }
+
+    void DefaultCase():
+    {} 
+    {
+        <DEFAULT_KEYWORD> <DOS_PUN> ListaSentencias()
+    }
+
+    //REPEAT
+    void SentenciaRepeat():
+    {}
+    {
+        <REPEAT> <K_I> ListaSentencias() <K_F> <WHILE> Condicion() 
+    }
     
-   
-}
+    //WHILE
+    void SentenciaWhile() :
+    {}
+    {
+        <WHILE> Condicion() <K_I> ListaSentencias() <K_F>
+    }
 
 
-//Declaracion IF
-void DeclaracionIF() :
-{}
-{
-    <IF> Condicion() <K_I> ListaSentencias() <K_F> (LOOKAHEAD(2) DecElse()| LOOKAHEAD(2) ElseIf())?
-}
 
-void DecElse() :
-{}
-{
-    <ELSE> <K_I> ListaSentencias() <K_F>
-}
-void ElseIf():
-{}
-{
-     <ELSE> <IF> Condicion() <K_I> ListaSentencias() <K_F> (LOOKAHEAD(2) DecElse()| LOOKAHEAD(2) ElseIf())?
-}
-
-void Condicion() :
-{}
-{
-   ( Exp() (<REL_OP> Exp() ((<AND> | <OR> | <NOT>)  (CondicionAnidada()|Exp()) (<REL_OP> Exp())?)* )? ) | ListaLet()
-}
-
-void CondicionAnidada(): 
-{}
-{
-<PAR_I> Condicion() <PAR_F>
-}
-
-void DeclaracionVar() :
-{}
-{
-    <VAR> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> Exp() )?
-}
-
-void DeclaracionLet() :
-{}
-{
-    <LET> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> Exp() )?
-}
+    //VAR 
+    void DeclaracionVar() :
+    {}
+    {
+        <VAR> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> Exp() )?
+    }
+    
+    //LET
+    void DeclaracionLet() :
+    {}
+    {
+        <LET> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> Exp() )?
+    }
+    void ListaLet():
+    {}
+    {
+    DeclaracionLet() (<COMA> DeclaracionLet())*
+    }
+    //ASIGNACION 
+    void Asignacion():
+    {}
+    {
+        <IDENT> <IGUAL> Exp()
+    }
 
 
-void Tipo() :
-{}
-{
-    <INT> | <UINT> | <FLOAT> | <STRING> | <BOOL> | <DOUBLE>
-}
-void Operadores():
-{}
-{
-<MAS> | <MENOS> | <MULTIPLICACION> | <DIVISION> | <MODULO> 
-}
-void Exp() :
-{}
-{
-  (<MENOS>)? Term() ( (Operadores()) (Term() | <PAR_I> Exp() <PAR_F>) )* 
-}
 
-void funcionesDefinidas():
-{}
-{
- <SQRT> | <POW> |<COS>| <SIN>| <LOG>| <READLINE> 
-}
-
-void Term() :
-{}
-{
-      <NUM> | LOOKAHEAD(2) LlamadoFunc() | LOOKAHEAD(2) ParametroLlamadaFun() |<IDENT>| <TRUE> | <FALSE>  | <STRING_LITERAL> 
-      
-}
-
-void Func() :
-{}
-{
-    <FUNC> <IDENT> <PAR_I> (Parametros())? <PAR_F> (Retorno())? <K_I> ListaSentencias() <K_F>
-}
-
-void Parametros() :
-{}
-{
-   Parametro() (<COMA> Parametro())*
-}
-
-void Parametro() :
-{}
-{
-   <IDENT> <DOS_PUN> Tipo()
-}
+    
 
 
-void Retorno() :
-{}
-{
-   <FLECHA> Tipo()
-}
+//CONDICIONAL
+    void Condicion() :
+    {}
+    {
+       ( Exp() (<REL_OP> Exp() ((<AND> | <OR> | <NOT>)  (CondicionAnidada()|Exp()) (<REL_OP> Exp())?)* )? ) | ListaLet()
+    }
 
-void RetornoSentencia():
-{}
-{
-    <RETURN> Exp() (<INTERROGACION> Exp())?
-}
-
-void Imprimir():
-{}
-{
-    <PRINT> <PAR_I> ListaExpPrint()  <PAR_F>
-}
-
-void ListaExp():
-{}
-{
-    Exp() (<COMA> Exp())*
-}
-
-void ListaExpPrint():
-{}
-{
-    Exp() (<COMA> (Exp() | Opcion_Print()  ))*
-}
-
-void Opcion_Print():
-{}
-{
-    (  <TERMINATOR> <DOS_PUN> Exp() ) |
-    (  <SEPARATOR> <DOS_PUN> Exp() ) 
-
-}
-
-void SentenciaRepeat():
-{}
-{
-    <REPEAT> <K_I> ListaSentencias() <K_F> <WHILE> Condicion() 
-}
-
-void Asignacion():
-{}
-{
-    <IDENT> <IGUAL> Exp()
-}
+    void CondicionAnidada(): 
+    {}
+    {
+    <PAR_I> Condicion() <PAR_F>
+    }
 
 
-void Switch():
-{}
-{
-    <SWITCH> Exp() <K_I> (Case())* (DefaultCase())? <K_F>
-}
+//Tipos de DATO
+    void Tipo() :
+    {}
+    {
+        <INT> | <UINT> | <FLOAT> | <STRING> | <BOOL> | <DOUBLE>
+    }
+
+//OPERADORES
+
+    void Operadores():
+    {}
+    {
+    <MAS> | <MENOS> | <MULTIPLICACION> | <DIVISION> | <MODULO> 
+    }
 
 
-void Case():
-{}
-{
-    <CASE> Exp() <DOS_PUN> ListaSentencias() 
-}
 
-void SentenciaWhile() :
-{}
-{
-    <WHILE> Condicion() <K_I> ListaSentencias() <K_F>
-}
+//FUNCIONES
 
-void ListaLet():
-{}
-{
-DeclaracionLet() (<COMA> DeclaracionLet())*
-}
+    void funcionesDefinidas():
+    {}
+    {
+     <SQRT> | <POW> |<COS>| <SIN>| <LOG>| <READLINE> 
+    }
+    
+    void Func() :
+    {}
+    {
+        <FUNC> <IDENT> <PAR_I> (Parametros())? <PAR_F> (Retorno())? <K_I> ListaSentencias() <K_F>
+    }
 
-void DefaultCase():
-{} 
-{
-    <DEFAULT_KEYWORD> <DOS_PUN> ListaSentencias()
-}
+    void LlamadoFunc():
+    {}
+    {
+    (<IDENT> |funcionesDefinidas() |Tipo()) <PAR_I> (ListaExp())? <PAR_F>
+    }
 
-void LlamadoFunc():
-{}
-{
-(<IDENT> |funcionesDefinidas() |Tipo()) <PAR_I> (ListaExp())? <PAR_F>
-}
+    void ParametroLlamadaFun():
+    {}
+    {
+    <IDENT> <DOS_PUN> Term()
+    }
+    
+    //RETURN
+    void Retorno() :
+    {}
+    {
+       <FLECHA> Tipo()
+    }
 
-void ParametroLlamadaFun():
-{}
-{
-<IDENT> <DOS_PUN> Term()
-}
+    void RetornoSentencia():
+    {}
+    {
+        <RETURN> Exp() 
+    }
+    
+    //PRINT
+    void Imprimir():
+    {}
+    {
+        <PRINT> <PAR_I> ListaExpPrint()  <PAR_F>
+    }
+
+    void ListaExpPrint():
+    {}
+    {
+        Exp() (<COMA> (Exp() | Opcion_Print()  ))*
+    }
+
+    void Opcion_Print():
+    {}
+    {
+        (  <TERMINATOR> <DOS_PUN> Exp() ) |
+        (  <SEPARATOR> <DOS_PUN> Exp() ) 
+
+    }
+
+
+//PARAMETROS
+    void Parametros() :
+    {}
+    {
+       Parametro() (<COMA> Parametro())*
+    }
+
+    void Parametro() :
+    {}
+    {
+       <IDENT> <DOS_PUN> Tipo()
+    }
+
+
+//TERMINOS Y EXPRESIONES
+    void ListaExp():
+    {}
+    {
+        Exp() (<COMA> Exp())*
+    }
+    
+    void Term() :
+    {}
+    {
+          <NUM> | LOOKAHEAD(2) LlamadoFunc() | LOOKAHEAD(2) ParametroLlamadaFun() |<IDENT>| <TRUE> | <FALSE>  | <STRING_LITERAL> 
+
+    }
+
+    //EXPRESIONES
+    void Exp() :
+    {}
+    {
+      (<MENOS>)? Term() ( (Operadores()) (Term() | <PAR_I> Exp() <PAR_F>) )* 
+    }
+
+
+
+
+
+
 
