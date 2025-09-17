@@ -28,7 +28,7 @@ SKIP : {
 
 TOKEN : {
     
-    < NUM:( ["0"-"9"] )>
+    < NUM:( (["0"-"9"])+ )>
     |< NUM_DEC:(( ["0"-"9"] )+ ( "." (["0"-"9"])+ ) )>
     |<STRING_LITERAL : 
         // String multilínea 
@@ -224,11 +224,11 @@ TOKEN : {
 
     //VAR 
     void DeclaracionVar() :
-    { Token id; Token tipo=null; }
+    { Token id; Token tipo=null; Token exp=null;}
     {
-        <VAR> id=<IDENT> ( <DOS_PUN> tipo=Tipo() )? ( <IGUAL> Exp() )?
+        <VAR> id=<IDENT> ( <DOS_PUN> tipo=Tipo() )? ( <IGUAL> exp=Exp() )?
         {
-            TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20);
+            TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, exp);
         }
     }
 
@@ -382,20 +382,25 @@ TOKEN : {
     
    Token Term() :
     { Token t = null; }
-    {
-        t=<IDENT> { 
+    {   
+
+        t=<NUM> { return t; }
+        | t=<NUM_DEC> { return t; }
+        | LOOKAHEAD(2) LlamadoFunc() { return null; }
+        |LOOKAHEAD(2) ParametroLlamadaFun(){ return null; }
+        |t=<IDENT> { 
             String msg = TokenAsignaciones.checkVariable(t);
             if (!msg.equals(" ")) {
                 erroresSem.addError(msg);
             }
             return t; 
         }
-      | t=<NUM> { return t; }
-      | t=<NUM_DEC> { return t; }
+      
+      
       | t=<TRUE> { return t; }
       | t=<FALSE> { return t; }
       | t=<STRING_LITERAL> { return t; }
-      | LOOKAHEAD(2) LlamadoFunc() { return null; }
+      
     }
 
 
