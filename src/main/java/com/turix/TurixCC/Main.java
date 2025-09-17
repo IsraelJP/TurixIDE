@@ -232,6 +232,7 @@ public class Main extends JFrame {
 
     /** Compila/Evalúa el contenido completo y separa errores en Léxico / Sintáctico. */
     private void onEvaluate(ActionEvent e) {
+        TokenAsignaciones.tabla.clear();
         String text = inputArea.getText();
         if (text == null || text.isBlank()) {
             setStatus("Nada que compilar");

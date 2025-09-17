@@ -17,7 +17,7 @@ public class TokenAsignaciones {
 
     public static boolean banInicio=false; 
     //Tabla que almacena tokens
-    private static Hashtable tabla=new Hashtable();
+    public static Hashtable tabla=new Hashtable();
      //Listas
     private static ArrayList<Integer> intComp = new ArrayList();
     private static ArrayList<Integer> decComp = new ArrayList();
@@ -27,15 +27,12 @@ public class TokenAsignaciones {
     public static void InsertarSimbolo(Token identificador, int tipoDato, Token valor){
         //En este método se agrega a la tabla de tokens el identificador que esta siendo 
         //declarado junto con su tipo de dato int e=2 -> e Int
+        
         tabla.put(identificador.image, tipoDato);
-        try{
+        if(valor!=null){
         checkAsing(identificador, valor); 
-        if (banInicio==true) throw new ExpDeclaracion("");
-        }catch(ExpDeclaracion e){
-            
-             tabla.remove(identificador.image);
-             e.getMessage();
         }
+       
     }
     
     public static void SetTables(){

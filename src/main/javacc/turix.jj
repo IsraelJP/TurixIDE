@@ -319,9 +319,11 @@ TOKEN : {
     }
 
     void ParametroLlamadaFun():
-    {}
+    {Token izq; Token der; }
     {
-    <IDENT> <DOS_PUN> Term()
+    izq=<IDENT> <DOS_PUN> der=Term(){
+    TokenAsignaciones.checkAsing(izq, der);
+    }
     }
     
     //RETURN
@@ -367,9 +369,11 @@ TOKEN : {
     }
 
     void Parametro() :
-    {}
+    {Token id; Token tipo; }
     {
-       <IDENT> <DOS_PUN> Tipo()
+       id=<IDENT> <DOS_PUN> tipo=Tipo(){
+       TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, null);
+       }
     }
 
 

@@ -650,10 +650,11 @@ TokenAsignaciones.checkAsing(izq, der);
     jj_consume_token(PAR_F);
 }
 
-  final public void ParametroLlamadaFun() throws ParseException {
-    jj_consume_token(IDENT);
+  final public void ParametroLlamadaFun() throws ParseException {Token izq; Token der;
+    izq = jj_consume_token(IDENT);
     jj_consume_token(DOS_PUN);
-    Term();
+    der = Term();
+TokenAsignaciones.checkAsing(izq, der);
 }
 
 //RETURN
@@ -764,10 +765,11 @@ TokenAsignaciones.checkAsing(izq, der);
     }
 }
 
-  final public void Parametro() throws ParseException {
-    jj_consume_token(IDENT);
+  final public void Parametro() throws ParseException {Token id; Token tipo;
+    id = jj_consume_token(IDENT);
     jj_consume_token(DOS_PUN);
-    Tipo();
+    tipo = Tipo();
+TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, null);
 }
 
 //TERMINOS Y EXPRESIONES
@@ -1025,12 +1027,6 @@ String msg = TokenAsignaciones.checkVariable(t);
     return false;
   }
 
-  private boolean jj_3R_LlamadoFunc_318_37_14()
- {
-    if (jj_3R_Tipo_283_7_16()) return true;
-    return false;
-  }
-
   private boolean jj_3_7()
  {
     if (jj_3R_ParametroLlamadaFun_324_5_12()) return true;
@@ -1040,6 +1036,12 @@ String msg = TokenAsignaciones.checkVariable(t);
   private boolean jj_3_6()
  {
     if (jj_3R_LlamadoFunc_318_5_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_LlamadoFunc_318_37_14()
+ {
+    if (jj_3R_Tipo_283_7_16()) return true;
     return false;
   }
 
