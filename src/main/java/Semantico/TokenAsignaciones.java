@@ -15,7 +15,7 @@ import java.util.Hashtable;
 public class TokenAsignaciones {
     
 
-    
+    public static boolean banInicio=false; 
     //Tabla que almacena tokens
     private static Hashtable tabla=new Hashtable();
      //Listas
@@ -28,7 +28,14 @@ public class TokenAsignaciones {
         //En este método se agrega a la tabla de tokens el identificador que esta siendo 
         //declarado junto con su tipo de dato int e=2 -> e Int
         tabla.put(identificador.image, tipoDato);
-        checkAsing(identificador, valor);
+        try{
+        checkAsing(identificador, valor); 
+        if (banInicio==true) throw new ExpDeclaracion("");
+        }catch(ExpDeclaracion e){
+            
+             tabla.remove(identificador.image);
+             e.getMessage();
+        }
     }
     
     public static void SetTables(){
@@ -92,7 +99,7 @@ public class TokenAsignaciones {
         //INT: Verificar si es entero
         if(tipoIdent1==20){
             if(!intComp.contains(tipoIdent2)){
-             
+                    banInicio=true; 
                    erroresSem.addError("Error: No se puede convertir "+TokenAsig.image+" a Entero \r\nLinea: "+TokenIzq.beginLine) ;
                 return;  
             }
@@ -100,6 +107,7 @@ public class TokenAsignaciones {
         //DOUBLE: Verificar si es Double
         else if(tipoIdent1==13){
             if(!decComp.contains(tipoIdent2)){
+                banInicio=true; 
                    erroresSem.addError("Error: No se puede convertir "+TokenAsig.image+" a Decimal \r\nLinea: "+TokenIzq.beginLine) ;
                 return; 
             }
@@ -107,18 +115,21 @@ public class TokenAsignaciones {
         //STRING: Verificar si es String
         else if(tipoIdent1==22){
             if(!strComp.contains(tipoIdent2)){
+                banInicio=true; 
                    erroresSem.addError( "Error: No se puede convertir "+TokenAsig.image+" a String \r\nLinea: "+TokenIzq.beginLine) ;
                 return; 
             }
         }
         //Bool: Verificar si es Bool
         else if(tipoIdent1==23){
+            banInicio=true; 
             if(!boolComp.contains(tipoIdent2)){
                    erroresSem.addError("Error: No se puede convertir "+TokenAsig.image+" a Booleano \r\nLinea: "+TokenIzq.beginLine) ;
                 return; 
             }
         }
         else{
+            banInicio=true; 
             erroresSem.addError("El identificador "+TokenIzq.image +" no ha sido declarado "+" Linea: "+TokenIzq.beginLine) ;
                 return; 
         }

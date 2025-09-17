@@ -8,6 +8,8 @@ package Semantico;
  *
  * @author stare
  */
-public class ExpDeclaracion {
-    
+public class ExpDeclaracion extends Exception{
+    public ExpDeclaracion(String Mensaje){
+       super(Mensaje);
+    }
 }
