@@ -7,7 +7,7 @@ package Semantico;
 import com.turix.TurixCC.Token;
 import java.util.ArrayList;
 import java.util.Hashtable;
-
+import com.turix.TurixCC.TurixConstants;
 /**
  *
  * @author stare
@@ -58,84 +58,105 @@ public class TokenAsignaciones {
     }
     //Token izquierdo es tipo
     //Token der resultado
+
     public static void checkAsing(Token TokenIzq, Token TokenAsig){
-        //Variables para almacenar el tipo de dato del identificador 
-        //y las asignaciones
-        int tipoIdent1;
-        int tipoIdent2 ;
-        
-        //No se ha declarado
-        if (TokenIzq.kind!=5 && TokenIzq.kind!=6 ){
-            try{
-                tipoIdent1=(Integer)tabla.get(TokenIzq.image);
-            }catch(Exception e){
-                erroresSem.addError("Error el identificador"+TokenIzq.image + "No ha sido declarado \r\nLinea: "+TokenIzq.beginLine) ;
-                return; 
-            }
-        }
-        else{
-            tipoIdent1=0; 
-            System.out.println("Entro aqui variable");
-        }
-        //Identificador e=pato
-        if(TokenAsig.kind== 60){
-            try{
-                tipoIdent2=(Integer) tabla.get(TokenAsig.image);
-            }catch(Exception e){
-                erroresSem.addError("Error: El identificador "+TokenAsig.image+"No ha sido declarado\r\nLinea: "+TokenIzq.beginLine) ;
-                return; 
-            
-            }
-        }
-        else if (TokenAsig.kind== 5  || TokenAsig.kind== 6 || TokenAsig.kind== 22 || TokenAsig.kind==58 || TokenAsig.kind==59 ){
-            tipoIdent2=TokenAsig.kind;
-        }else{
-            tipoIdent2=0;
-        }
-        
-        //INT: Verificar si es entero
-        if(tipoIdent1==20){
-            if(!intComp.contains(tipoIdent2)){
-                    banInicio=true; 
-                   erroresSem.addError("Error: No se puede convertir "+TokenAsig.image+" a Entero \r\nLinea: "+TokenIzq.beginLine) ;
-                return;  
-            }
-        }
-        //DOUBLE: Verificar si es Double
-        else if(tipoIdent1==13){
-            if(!decComp.contains(tipoIdent2)){
-                banInicio=true; 
-                   erroresSem.addError("Error: No se puede convertir "+TokenAsig.image+" a Decimal \r\nLinea: "+TokenIzq.beginLine) ;
-                return; 
-            }
-        }
-        //STRING: Verificar si es String
-        else if(tipoIdent1==22){
-            if(!strComp.contains(tipoIdent2)){
-                banInicio=true; 
-                   erroresSem.addError( "Error: No se puede convertir "+TokenAsig.image+" a String \r\nLinea: "+TokenIzq.beginLine) ;
-                return; 
-            }
-        }
-        //Bool: Verificar si es Bool
-        else if(tipoIdent1==23){
-            banInicio=true; 
-            if(!boolComp.contains(tipoIdent2)){
-                   erroresSem.addError("Error: No se puede convertir "+TokenAsig.image+" a Booleano \r\nLinea: "+TokenIzq.beginLine) ;
-                return; 
-            }
-        }
-        else{
-            banInicio=true; 
-            erroresSem.addError("El identificador "+TokenIzq.image +" no ha sido declarado "+" Linea: "+TokenIzq.beginLine) ;
-                return; 
+        // 0) Guardas defensivas
+        if (TokenIzq == null) {
+            erroresSem.addError("Asignación inválida: identificador izquierdo nulo.");
+            return;
         }
         if (TokenAsig == null) {
-  
-        return;
+            erroresSem.addError(
+                "Asignación inválida a '" + TokenIzq.image +
+                "': la expresión del lado derecho no se pudo evaluar (es nula). " +
+                "Línea: " + TokenIzq.beginLine
+            );
+            return;
+        }
+
+        // 1) Determinar tipo del identificador izquierdo (debe existir en la tabla)
+        int tipoIdent1;
+        if (TokenIzq.kind != TurixConstants.NUM && TokenIzq.kind != TurixConstants.NUM_DEC) {
+            try {
+                tipoIdent1 = (Integer) tabla.get(TokenIzq.image);
+            } catch (Exception e) {
+                erroresSem.addError(
+                    "Error: el identificador '" + TokenIzq.image + "' no ha sido declarado. " +
+                    "Línea: " + TokenIzq.beginLine
+                );
+                return;
+            }
+        } else {
+            // Si por alguna razón llega un literal a la izquierda (no debería), lo marcamos inválido
+            erroresSem.addError(
+                "Asignación inválida: la izquierda debe ser un identificador, no un literal. " +
+                "Línea: " + TokenIzq.beginLine
+            );
+            return;
+        }
+
+        // 2) Determinar tipo del lado derecho (identificador o literal/constante)
+        int tipoIdent2;
+        if (TokenAsig.kind == TurixConstants.IDENT) {
+            try {
+                tipoIdent2 = (Integer) tabla.get(TokenAsig.image);
+            } catch (Exception e) {
+                erroresSem.addError(
+                    "Error: el identificador '" + TokenAsig.image + "' (lado derecho) no ha sido declarado. " +
+                    "Línea: " + TokenIzq.beginLine
+                );
+                return;
+            }
+        } else if (
+            TokenAsig.kind == TurixConstants.NUM ||
+            TokenAsig.kind == TurixConstants.NUM_DEC ||
+            TokenAsig.kind == TurixConstants.STRING_LITERAL ||
+            TokenAsig.kind == TurixConstants.STRING ||
+            TokenAsig.kind == TurixConstants.FALSE ||
+            TokenAsig.kind == TurixConstants.TRUE
+        ) {
+            // Para literales/keywords, su "tipo" lo igualamos al kind del token.
+            tipoIdent2 = TokenAsig.kind;
+        } else {
+            // Si no reconocemos (p.ej. una expresión compuesta), sé conservador.
+            // Aquí podrías inferir el tipo de la expresión si implementas propagación de tipos.
+            tipoIdent2 = 0; // desconocido
+        }
+
+        // 3) Reglas de compatibilidad (ejemplos)
+        //   INT (20) acepta NUM y NUM_DEC (según tu diseño puedes limitarlo a NUM)
+        if (tipoIdent1 == TurixConstants.INT) {
+            if (!(tipoIdent2 == TurixConstants.NUM || tipoIdent2 == TurixConstants.NUM_DEC)) {
+                erroresSem.addError(
+                    "No se puede asignar '" + TokenAsig.image + "' a Int. Línea: " + TokenIzq.beginLine
+                );
+                return;
+            }
+        } else if (tipoIdent1 == TurixConstants.DOUBLE) {
+            if (!(tipoIdent2 == TurixConstants.NUM || tipoIdent2 == TurixConstants.NUM_DEC)) {
+                erroresSem.addError(
+                    "No se puede asignar '" + TokenAsig.image + "' a Double. Línea: " + TokenIzq.beginLine
+                );
+                return;
+            }
+        } else if (tipoIdent1 == TurixConstants.STRING) {
+            if (!(tipoIdent2 == TurixConstants.STRING_LITERAL || tipoIdent2 == TurixConstants.STRING)) {
+                erroresSem.addError(
+                    "No se puede asignar '" + TokenAsig.image + "' a String. Línea: " + TokenIzq.beginLine
+                );
+                return;
+            }
+        } else if (tipoIdent1 == TurixConstants.BOOL) {
+            if (!(tipoIdent2 == TurixConstants.TRUE || tipoIdent2 == TurixConstants.FALSE)) {
+                erroresSem.addError(
+                    "No se puede asignar '" + TokenAsig.image + "' a Bool. Línea: " + TokenIzq.beginLine
+                );
+                return;
+            }
+        }
+        // Si todo pasa, la asignación es compatible.
     }
-        
-    }
+
     //Método que verifica un identificador ha sido declarado
     public static String checkVariable(Token checkTok){
         try{
@@ -145,6 +166,7 @@ public class TokenAsignaciones {
             return "Error: El indentificador "+checkTok.image+" No ha sido declarado"+" Linea: "+checkTok.beginLine;
         }
     }
+}
     
 
-}
+
