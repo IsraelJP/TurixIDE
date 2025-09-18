@@ -248,6 +248,7 @@ public class Main extends JFrame {
 
     int erroresLex = 0;
     int erroresSin = 0;
+    int erroresSemanticos=0; 
 
     // ============================================================
     // 1) LÉXICO (sobre TODO el texto, independiente del parser)
@@ -354,8 +355,10 @@ public class Main extends JFrame {
         for (String err : erroresSem.getErrores()) {
             semArea.append("✘ Semántico: " + err + "\n");
         }
+        erroresSemanticos=erroresSem.getErrores().size();
         semArea.append("✘ Total de errores semánticos: "
-                + erroresSem.getErrores().size() + "\n");
+                + erroresSemanticos + "\n");
+        
     }
 
     // ============================================================
@@ -368,8 +371,8 @@ public class Main extends JFrame {
     }
 
     setStatus(String.format(
-        "Compilación terminada: %d errores léxicos, %d errores sintácticos",
-        erroresLex, erroresSin
+        "Compilación terminada: %d errores léxicos, %d errores sintácticos, %d errores semánticos",
+        erroresLex, erroresSin,erroresSemanticos
     ));
 }
 
