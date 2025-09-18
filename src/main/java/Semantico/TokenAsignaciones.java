@@ -29,7 +29,6 @@ public class TokenAsignaciones {
     public static void InsertarSimbolo(Token identificador, int tipoDato, Token valor){
         //En este método se agrega a la tabla de tokens el identificador que esta siendo 
         //declarado junto con su tipo de dato int e=2 -> e Int
-        
         tabla.put(identificador.image, tipoDato);
         if(valor!=null){
         checkAsing(identificador, valor); 
@@ -51,7 +50,6 @@ public class TokenAsignaciones {
         
         strComp.add(7); //String literal AHUNSNKJKS
         strComp.add(22); //String 
-        strComp.add(24);//Char
         
         boolComp.add(23);//Bool
         boolComp.add(58); //False
@@ -63,6 +61,7 @@ public class TokenAsignaciones {
     public static void checkAsing(Token TokenIzq, Token TokenAsig){
         //Variables para almacenar el tipo de dato del identificador 
         //y las asignaciones
+
         int tipoIdent1;
         int tipoIdent2 ;
         
@@ -71,7 +70,7 @@ public class TokenAsignaciones {
             try{
                 tipoIdent1=(Integer)tabla.get(TokenIzq.image);
             }catch(Exception e){
-                erroresSem.addError("Error el identificador"+TokenIzq.image + "No ha sido declarado \r\nLinea: "+TokenIzq.beginLine) ;
+                erroresSem.addError("Error el identificador "+TokenIzq.image + " No ha sido declarado \r\nLinea: "+TokenIzq.beginLine);
                 return; 
             }
         }
@@ -84,12 +83,12 @@ public class TokenAsignaciones {
             try{
                 tipoIdent2=(Integer) tabla.get(TokenAsig.image);
             }catch(Exception e){
-                erroresSem.addError("Error: El identificador "+TokenAsig.image+"No ha sido declarado\r\nLinea: "+TokenIzq.beginLine) ;
+                erroresSem.addError("Error: El identificador "+TokenAsig.image+" No ha sido declarado\r\nLinea: "+TokenIzq.beginLine) ;
                 return; 
             
             }
         }
-        else if (TokenAsig.kind== 5  || TokenAsig.kind== 6 || TokenAsig.kind== 22 || TokenAsig.kind==58 || TokenAsig.kind==59 ){
+        else if (TokenAsig.kind== 5  || TokenAsig.kind== 6 || TokenAsig.kind== 7 || TokenAsig.kind==58 || TokenAsig.kind==59 ){
             tipoIdent2=TokenAsig.kind;
         }else{
             tipoIdent2=0;
@@ -107,7 +106,7 @@ public class TokenAsignaciones {
         else if(tipoIdent1==13){
             if(!decComp.contains(tipoIdent2)){
                 banInicio=true; 
-                   erroresSem.addError("Error: No se puede convertir "+TokenAsig.image+" a Decimal \r\nLinea: "+TokenIzq.beginLine) ;
+                   erroresSem.addError("Error: No se puede convertir "+TokenAsig.image+" a Doble \r\nLinea: "+TokenIzq.beginLine) ;
                 return; 
             }
         }

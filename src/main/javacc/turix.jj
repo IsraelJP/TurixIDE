@@ -199,7 +199,7 @@ TOKEN : {
     {
         <CASE> Exp(null) <DOS_PUN> ListaSentencias() 
     }
-
+    
     void DefaultCase():
     {} 
     {
@@ -386,13 +386,13 @@ TOKEN : {
     }
     
    Token Term() :
-    { Token t = null; }
+    { Token t = null; Token temp=null;}
     {   
 
         t=<NUM> { return t; }
         | t=<NUM_DEC> { return t; }
-        | LOOKAHEAD(2) LlamadoFunc() { return null; }
-        |LOOKAHEAD(2) ParametroLlamadaFun(){ return null; }
+        | LOOKAHEAD(2) LlamadoFunc() { return new Token(5); }
+        |LOOKAHEAD(2) ParametroLlamadaFun(){ return new Token(5); }
         |t=<IDENT> { 
             String msg = TokenAsignaciones.checkVariable(t);
             if (!msg.equals(" ")) {

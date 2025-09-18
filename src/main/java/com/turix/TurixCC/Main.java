@@ -232,39 +232,45 @@ public class Main extends JFrame {
 
     /** Compila/Evalúa el contenido completo y separa errores en Léxico / Sintáctico. */
     private void onEvaluate(ActionEvent e) {
-        TokenAsignaciones.tabla.clear();
-        String text = inputArea.getText();
-        if (text == null || text.isBlank()) {
-            setStatus("Nada que compilar");
-            return;
-        }
+    // --- Estado inicial ---
+    TokenAsignaciones.tabla.clear();
+    TokenAsignaciones.SetTables(); // prepara tablas/ambiente semántico
 
-        lexArea.setText("== Análisis Léxico ==\n");
-        synArea.setText("== Análisis Sintáctico ==\n");
-        semArea.setText("== Análisis Semántico ==\n");
-        TokenAsignaciones.SetTables();
-        int erroresLex = 0;
-        int erroresSin = 0;
+    String text = inputArea.getText();
+    if (text == null || text.isBlank()) {
+        setStatus("Nada que compilar");
+        return;
+    }
 
-        // ---------- LÉXICO ----------
-        SimpleCharStream scsLex = new SimpleCharStream(new StringReader(text), 1, 1);
-        TurixTokenManager lex = new TurixTokenManager(scsLex);
+    lexArea.setText("== Análisis Léxico ==\n");
+    synArea.setText("== Análisis Sintáctico ==\n");
+    semArea.setText("== Análisis Semántico ==\n");
 
-        Token t = null;
+    int erroresLex = 0;
+    int erroresSin = 0;
 
-        while (true) {
+    // ============================================================
+    // 1) LÉXICO (sobre TODO el texto, independiente del parser)
+    // ============================================================
+    SimpleCharStream scsLex = new SimpleCharStream(new StringReader(text), 1, 1);
+    TurixTokenManager lex = new TurixTokenManager(scsLex);
+    Token t = null;
+
+    while (true) {
         try {
             t = lex.getNextToken();
             if (t.kind == TurixConstants.EOF) break;
 
-            if (t.kind == TurixConstants.ERROR_IDENT || t.kind == TurixConstants.ERROR_IDENT || t.kind == TurixConstants.ERROROPERA
-                    || t.kind == TurixConstants.ERROR) {
+            if (t.kind == TurixConstants.ERROR_IDENT
+                || t.kind == TurixConstants.ERROROPERA
+                || t.kind == TurixConstants.ERROR) {
                 erroresLex++;
                 lexArea.append(String.format(
                     "✘ Léxico: Error en la línea %d, col %d. Token inválido => '%s'%n",
                     t.beginLine, t.beginColumn, t.image
                 ));
-                continue; // no lo mostramos como token válido
+                // no listamos como token válido
+                continue;
             }
 
             // Solo mostramos tokens válidos
@@ -276,67 +282,97 @@ public class Main extends JFrame {
         } catch (TokenMgrError tme) {
             erroresLex++;
             lexArea.append("✘ Léxico: " + tme.getMessage() + "\n");
-            try { scsLex.readChar(); } catch (IOException ex) { break; }
+            try {
+                // intentamos saltar 1 char para no quedar atascados
+                scsLex.readChar();
+            } catch (IOException ex) {
+                break;
+            }
         }
     }
 
-        if (erroresLex == 0) lexArea.append("✔ Sin errores léxicos\n");
-        else lexArea.append(String.format("✘ Total de errores léxicos: %d%n", erroresLex));
+    if (erroresLex == 0) {
+        lexArea.append("✔ Sin errores léxicos\n");
+    } else {
+        lexArea.append(String.format("✘ Total de errores léxicos: %d%n", erroresLex));
+    }
 
-        // ---------- SINTÁCTICO ----------
-        try {
-            Turix parser = new Turix(new StringReader(text));
-            boolean continuar = true;
+    // ============================================================
+    // 2) SINTÁCTICO + SEMÁNTICO (UN SOLO PARSEO con recuperación)
+    //    - Las acciones semánticas se ejecutan durante el parse.
+    //    - Al final, imprimimos la bolsa de errores semánticos.
+    // ============================================================
+    erroresSem.resetErrores(); // vacía la bolsa ANTES de parsear
 
-            while (continuar) {
+    try {
+        Turix parser = new Turix(new StringReader(text));
+        boolean continuar = true;
+
+        while (continuar) {
+            try {
+                parser.Start();     // intenta parsear hasta EOF
+                continuar = false;  // si no lanzó excepción, llegó a EOF
+            } catch (ParseException pe) {
+                erroresSin++;
+                synArea.append("✘ Sintaxis: " + pe.getMessage() + "\n");
+
+                // ---- Recuperación: avanzar un token y reintentar ----
                 try {
-                    parser.Start(); // intentamos parsear
-                    continuar = false;
-                } catch (ParseException pe) {
-                    erroresSin++;
-                    synArea.append("✘ Sintaxis: " + pe.getMessage() + "\n");
-
-                    // Avanzamos un token para no quedar atrapados
-                    Token next = parser.getToken(1); 
+                    Token next = parser.getToken(1); // mira el siguiente
                     if (next.kind == TurixConstants.EOF) {
                         continuar = false;
                     } else {
+                        // consume uno y sigue (pequeño "panic-mode" local)
                         parser.token = parser.getToken(2);
                     }
-                } catch (TokenMgrError tme) {
-                    // Si el parser encuentra un error léxico dentro, avanzamos
-                    try { scsLex.readChar(); } catch (IOException ex) { continuar = false; }
+                } catch (Throwable ignore) {
+                    continuar = false;
                 }
-            }
 
-        } catch (Exception ex) {
-            erroresSin++;
-            synArea.append("✘ Error inesperado: " + ex.getMessage() + "\n");
-        }
-        //---------SEMÁNTICO-------
-        erroresSem.resetErrores(); // limpiar antes
-        try {
-            Turix parser = new Turix(new StringReader(text));
-            parser.Start(); 
-            } catch (Exception ex) {
-                // ya lo manejaste en sintaxis
+            } catch (TokenMgrError tme) {
+                // Error léxico detectado durante el parse
+                erroresSin++; // lo contamos como obstáculo de parseo
+                synArea.append("✘ Sintaxis/Léxico en parser: " + tme.getMessage() + "\n");
+                // Intento conservador: salir del bucle para no quedar en estado inconsistente
+                // Si quieres ser más agresivo, podrías re-crear el parser desde
+                // la misma cadena y posicionarte, pero requiere más soporte en el scanner.
+                continuar = false;
             }
-        if (erroresSem.getErrores().isEmpty()) {
-            semArea.append("✔ Sin errores semánticos\n");
-        } else {
-            for (String err :erroresSem.getErrores()) {
-                semArea.append("✘ Semántico: " + err + "\n");
-            }
-            semArea.append("✘ Total de errores semánticos: " +
-                           erroresSem.getErrores().size() + "\n");
         }
-        if (erroresSin == 0) synArea.append("✔ Sin errores Sintácticos\n");
-        else synArea.append(String.format("✘ Total de errores sintácticos: %d%n", erroresSin));
 
-        setStatus(String.format(
-            "Compilación terminada: %d errores léxicos, %d errores sintácticos",
-            erroresLex, erroresSin));
+    } catch (Exception ex) {
+        erroresSin++;
+        synArea.append("✘ Error inesperado (parser): " + ex.getMessage() + "\n");
     }
+
+    // ============================================================
+    // 3) REPORTE DE SEMÁNTICA (se llenó durante el parse)
+    // ============================================================
+    if (erroresSem.getErrores().isEmpty()) {
+        semArea.append("✔ Sin errores semánticos\n");
+    } else {
+        for (String err : erroresSem.getErrores()) {
+            semArea.append("✘ Semántico: " + err + "\n");
+        }
+        semArea.append("✘ Total de errores semánticos: "
+                + erroresSem.getErrores().size() + "\n");
+    }
+
+    // ============================================================
+    // 4) Cierre / Estado
+    // ============================================================
+    if (erroresSin == 0) {
+        synArea.append("✔ Sin errores sintácticos\n");
+    } else {
+        synArea.append(String.format("✘ Total de errores sintácticos: %d%n", erroresSin));
+    }
+
+    setStatus(String.format(
+        "Compilación terminada: %d errores léxicos, %d errores sintácticos",
+        erroresLex, erroresSin
+    ));
+}
+
 
 
 

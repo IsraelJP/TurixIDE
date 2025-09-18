@@ -793,7 +793,7 @@ TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, null);
     }
 }
 
-  final public Token Term() throws ParseException {Token t = null;
+  final public Token Term() throws ParseException {Token t = null; Token temp=null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case NUM:{
       t = jj_consume_token(NUM);
@@ -809,10 +809,10 @@ TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, null);
       jj_la1[30] = jj_gen;
       if (jj_2_6(2)) {
         LlamadoFunc();
-{if ("" != null) return null;}
+{if ("" != null) return new Token(5);}
       } else if (jj_2_7(2)) {
         ParametroLlamadaFun();
-{if ("" != null) return null;}
+{if ("" != null) return new Token(5);}
       } else {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case IDENT:{
