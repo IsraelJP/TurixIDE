@@ -244,6 +244,7 @@ TOKEN : {
     {
     DeclaracionLet() (<COMA> DeclaracionLet())*
     }
+
     //ASIGNACION 
 
     void Asignacion():
@@ -256,9 +257,6 @@ TOKEN : {
     }
 
 
-
-
-    
 
 
 //CONDICIONAL
@@ -317,16 +315,14 @@ TOKEN : {
     void LlamadoFunc():
     {}
     {
+    
     (<IDENT> |funcionesDefinidas() |Tipo()) <PAR_I> (ListaExp())? <PAR_F>
-    {
-        ParametroLlamadaFun();
-    }
     }
 
     void ParametroLlamadaFun():
     {Token izq; Token der; }
     {
-    izq=<IDENT> <DOS_PUN> der=Term(){
+    izq=<IDENT> <DOS_PUN> der=Exp(izq){
     TokenAsignaciones.checkAsing(izq, der);
     }
     }
@@ -424,13 +420,15 @@ TOKEN : {
         ( <MENOS> )?
         t=Term()
         ( (Operadores()) 
-           (temp=Term()
-                { TokenAsignaciones.checkAsing(iden, temp);  }
-            | <PAR_I> Exp(null) <PAR_F>) 
-         )*
+               (temp=Term()
+                    {
+                        if (iden != null) {
+                            TokenAsignaciones.checkAsing(iden, temp);
+                        }
+                    }
+                | <PAR_I> temp=Exp(null) <PAR_F>) 
+        )*
         {
-            // devolvemos el primer token encontrado (t),
-            // si quieres ser más estricto podrías devolver temp (último usado)
             return t;
         }
     }
