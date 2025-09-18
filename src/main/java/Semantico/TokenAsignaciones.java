@@ -14,6 +14,18 @@ import java.util.Hashtable;
  */
 public class TokenAsignaciones {
     
+    // En TokenAsignaciones
+    public static Hashtable<String, FuncionInfo> tablaFunciones = new Hashtable<>();
+
+    public static class FuncionInfo {
+        public ArrayList<Integer> tiposParametros;
+        public int tipoRetorno;
+
+        public FuncionInfo(ArrayList<Integer> tiposParametros, int tipoRetorno) {
+            this.tiposParametros = tiposParametros;
+            this.tipoRetorno = tipoRetorno;
+        }
+    }
 
     public static boolean banInicio=false; 
     //Tabla que almacena tokens

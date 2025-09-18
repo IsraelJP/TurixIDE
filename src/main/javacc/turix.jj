@@ -164,7 +164,7 @@ TOKEN : {
        | Asignacion()
        | Switch()
        | SentenciaWhile()
-       | Exp()
+       | Exp(null)
 
     }
 
@@ -192,12 +192,12 @@ TOKEN : {
     void Switch():
     {}
     {
-        <SWITCH> Exp() <K_I> (Case())* (DefaultCase())? <K_F>
+        <SWITCH> Exp(null) <K_I> (Case())* (DefaultCase())? <K_F>
     }
     void Case():
     {}
     {
-        <CASE> Exp() <DOS_PUN> ListaSentencias() 
+        <CASE> Exp(null) <DOS_PUN> ListaSentencias() 
     }
 
     void DefaultCase():
@@ -226,7 +226,7 @@ TOKEN : {
     void DeclaracionVar() :
     { Token id; Token tipo=null; Token exp=null;}
     {
-        <VAR> id=<IDENT> ( <DOS_PUN> tipo=Tipo() )? ( <IGUAL> exp=Exp() )?
+        <VAR> id=<IDENT> ( <DOS_PUN> tipo=Tipo() )? ( <IGUAL> exp=Exp(id) )?
         {
             TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, exp);
         }
@@ -237,7 +237,7 @@ TOKEN : {
     void DeclaracionLet() :
     {}
     {
-        <LET> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> Exp() )?
+        <LET> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> Exp(null) )?
     }
     void ListaLet():
     {}
@@ -245,10 +245,11 @@ TOKEN : {
     DeclaracionLet() (<COMA> DeclaracionLet())*
     }
     //ASIGNACION 
+
     void Asignacion():
     { Token izq; Token der; }
     {
-        izq=<IDENT> <IGUAL> der=Exp()
+        izq=<IDENT> <IGUAL> der=Exp(null)
         {
             TokenAsignaciones.checkAsing(izq, der);
         }
@@ -264,7 +265,7 @@ TOKEN : {
     void Condicion() :
     {}
     {
-       ( Exp() (<REL_OP> Exp() ((<AND> | <OR> | <NOT>)  (CondicionAnidada()|Exp()) (<REL_OP> Exp())?)* )? ) | ListaLet()
+       ( Exp(null) (<REL_OP> Exp(null) ((<AND> | <OR> | <NOT>)  (CondicionAnidada()|Exp(null)) (<REL_OP> Exp(null))?)* )? ) | ListaLet()
     }
 
     void CondicionAnidada(): 
@@ -312,10 +313,14 @@ TOKEN : {
         <FUNC> <IDENT> <PAR_I> (Parametros())? <PAR_F> (Retorno())? <K_I> ListaSentencias() <K_F>
     }
 
+    //
     void LlamadoFunc():
     {}
     {
     (<IDENT> |funcionesDefinidas() |Tipo()) <PAR_I> (ListaExp())? <PAR_F>
+    {
+        ParametroLlamadaFun();
+    }
     }
 
     void ParametroLlamadaFun():
@@ -336,7 +341,7 @@ TOKEN : {
     void RetornoSentencia():
     {}
     {
-        <RETURN> Exp() 
+        <RETURN> Exp(null) 
     }
     
     //PRINT
@@ -349,14 +354,14 @@ TOKEN : {
     void ListaExpPrint():
     {}
     {
-        Exp() (<COMA> (Exp() | Opcion_Print()  ))*
+        Exp(null) (<COMA> (Exp(null) | Opcion_Print()  ))*
     }
 
     void Opcion_Print():
     {}
     {
-        (  <TERMINATOR> <DOS_PUN> Exp() ) |
-        (  <SEPARATOR> <DOS_PUN> Exp() ) 
+        (  <TERMINATOR> <DOS_PUN> Exp(null) ) |
+        (  <SEPARATOR> <DOS_PUN> Exp(null) ) 
 
     }
 
@@ -381,7 +386,7 @@ TOKEN : {
     void ListaExp():
     {}
     {
-        Exp() (<COMA> Exp())*
+        Exp(null) (<COMA> Exp(null))*
     }
     
    Token Term() :
@@ -410,7 +415,7 @@ TOKEN : {
 
 
     //EXPRESIONES
-    Token Exp() :
+    Token Exp(Token iden) :
     {
         Token t = null;
         Token temp = null;
@@ -418,7 +423,11 @@ TOKEN : {
     {
         ( <MENOS> )?
         t=Term()
-        ( (Operadores()) (temp=Term() | <PAR_I> temp=Exp() <PAR_F>) )*
+        ( (Operadores()) 
+           (temp=Term()
+                { TokenAsignaciones.checkAsing(iden, temp);  }
+            | <PAR_I> Exp(null) <PAR_F>) 
+         )*
         {
             // devolvemos el primer token encontrado (t),
             // si quieres ser más estricto podrías devolver temp (último usado)
