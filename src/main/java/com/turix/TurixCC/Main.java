@@ -143,14 +143,14 @@ public class Main extends JFrame {
     private JToolBar buildToolBar() {
         JToolBar tb = new JToolBar();
         tb.setFloatable(false);
-        tb.add(button(actOpen,"🗄Abrir"));
-        tb.add(button(actSaveAs,"🖫Guardar"));
+        tb.add(button(actOpen,"📂Abrir"));
+        tb.add(button(actSaveAs,"💾Guardar"));
         tb.addSeparator();
-        tb.add(button(actCompile,"⟲Compilar"));
+        tb.add(button(actCompile,"Compilar"));
         tb.add(button(actClearOut,"🧹Limpiar"));
         tb.addSeparator();
-        tb.add(button(actZoomIn,"Zoom ➕"));
-        tb.add(button(actZoomOut,"Zoom ➖"));
+        tb.add(button(actZoomIn,"Zoom +"));
+        tb.add(button(actZoomOut,"Zoom -"));
         return tb;
     }
 
