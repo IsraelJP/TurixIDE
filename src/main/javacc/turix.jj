@@ -412,26 +412,32 @@ TOKEN : {
 
     //EXPRESIONES
     Token Exp(Token iden) :
-{
-    Token t = null;
-    Token temp = null;
-}
-{
-    ( <MENOS> )?
-    t=Term()
-
-    ( (Operadores()) 
-           (temp=Term()
-                {
-                    if (iden != null) {
-                        TokenAsignaciones.checkAsing(iden, temp);
-                    }
-                }
-            | <PAR_I> temp=Exp(null) <PAR_F>) 
-    )*
     {
-        return t;
+        Token t = null;
+        Token temp = null;
+
     }
-}
+    {
+        ( <MENOS> )?
+        t=Term(){
+           if(t.kind==60){
+            iden=t;
+           }
+        }
+        ( 
+            (Operadores()) 
+               (temp=Term()
+                    {
+                        if (iden != null) {
+                            TokenAsignaciones.checkAsing(iden, temp);
+                        }
+
+                    }
+                | <PAR_I> temp=Exp(null) <PAR_F>) 
+        )*
+        {
+            return t;
+        }
+    }
 
 

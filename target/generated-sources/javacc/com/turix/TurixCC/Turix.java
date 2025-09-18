@@ -851,7 +851,7 @@ String msg = TokenAsignaciones.checkVariable(t);
 
 //EXPRESIONES
   final public     Token Exp(Token iden) throws ParseException {Token t = null;
-    Token temp = null;
+        Token temp = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case MENOS:{
       jj_consume_token(MENOS);
@@ -862,6 +862,9 @@ String msg = TokenAsignaciones.checkVariable(t);
       ;
     }
     t = Term();
+if(t.kind==60){
+            iden=t;
+           }
     label_8:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -898,8 +901,8 @@ String msg = TokenAsignaciones.checkVariable(t);
       case IDENT:{
         temp = Term();
 if (iden != null) {
-                        TokenAsignaciones.checkAsing(iden, temp);
-                    }
+                            TokenAsignaciones.checkAsing(iden, temp);
+                        }
         break;
         }
       case PAR_I:{
