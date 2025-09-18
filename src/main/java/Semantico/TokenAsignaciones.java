@@ -5,6 +5,7 @@
 package Semantico;
 
 import com.turix.TurixCC.Token;
+import com.turix.TurixCC.TurixConstants;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -147,5 +148,45 @@ public class TokenAsignaciones {
         }
     }
     
+    public static void checkOperacion(Token izq, Token der, Token op) {
+        if (izq == null || der == null || op == null) return;
+
+        switch (op.kind) {
+            case TurixConstants.MAS: // +
+                if ((izq.kind == TurixConstants.INT && der.kind == TurixConstants.INT) ||
+                    (izq.kind == TurixConstants.FLOAT && der.kind == TurixConstants.FLOAT) ||
+                    (izq.kind == TurixConstants.STRING && der.kind == TurixConstants.STRING)) {
+                    return; // válido
+                }
+                erroresSem.addError("Error: No se puede aplicar '+' entre " +
+                        nombreTipo(izq.kind) + " y " + nombreTipo(der.kind));
+                break;
+
+            case TurixConstants.MENOS: // -
+            case TurixConstants.MULTIPLICACION:
+            case TurixConstants.DIVISION:
+                if ((izq.kind == TurixConstants.INT || izq.kind == TurixConstants.FLOAT) &&
+                    (der.kind == TurixConstants.INT || der.kind == TurixConstants.FLOAT)) {
+                    return; // válido entre numéricos
+                }
+                erroresSem.addError("Error: Operación '" + op.image + "' inválida entre " +
+                        nombreTipo(izq.kind) + " y " + nombreTipo(der.kind));
+                break;
+
+            default:
+                // otros operadores los puedes ir agregando
+                break;
+        }
+    }
+    public static String nombreTipo(int kind) {
+        switch (kind) {
+            case TurixConstants.INT: return "Int";
+            case TurixConstants.FLOAT: return "Float";
+            case TurixConstants.STRING: return "String";
+            case TurixConstants.BOOL: return "Bool";
+            case TurixConstants.DOUBLE: return "Double";
+            default: return "Desconocido(" + kind + ")";
+        }
+    }
 
 }
