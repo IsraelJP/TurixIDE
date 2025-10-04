@@ -199,7 +199,7 @@ TOKEN : {
     {
         <CASE> Exp(null) <DOS_PUN> ListaSentencias() 
     }
-
+    
     void DefaultCase():
     {} 
     {
@@ -244,6 +244,7 @@ TOKEN : {
     {
     DeclaracionLet() (<COMA> DeclaracionLet())*
     }
+
     //ASIGNACION 
 
     void Asignacion():
@@ -256,9 +257,6 @@ TOKEN : {
     }
 
 
-
-
-    
 
 
 //CONDICIONAL
@@ -317,16 +315,14 @@ TOKEN : {
     void LlamadoFunc():
     {}
     {
+    
     (<IDENT> |funcionesDefinidas() |Tipo()) <PAR_I> (ListaExp())? <PAR_F>
-    {
-        ParametroLlamadaFun();
-    }
     }
 
     void ParametroLlamadaFun():
     {Token izq; Token der; }
     {
-    izq=<IDENT> <DOS_PUN> der=Term(){
+    izq=<IDENT> <DOS_PUN> der=Exp(izq){
     TokenAsignaciones.checkAsing(izq, der);
     }
     }
@@ -390,13 +386,13 @@ TOKEN : {
     }
     
    Token Term() :
-    { Token t = null; }
+    { Token t = null; Token temp=null;}
     {   
 
         t=<NUM> { return t; }
         | t=<NUM_DEC> { return t; }
-        | LOOKAHEAD(2) LlamadoFunc() { return null; }
-        |LOOKAHEAD(2) ParametroLlamadaFun(){ return null; }
+        | LOOKAHEAD(2) LlamadoFunc() { return new Token(5); }
+        |LOOKAHEAD(2) ParametroLlamadaFun(){ return new Token(5); }
         |t=<IDENT> { 
             String msg = TokenAsignaciones.checkVariable(t);
             if (!msg.equals(" ")) {
@@ -419,19 +415,29 @@ TOKEN : {
     {
         Token t = null;
         Token temp = null;
+
     }
     {
         ( <MENOS> )?
-        t=Term()
-        ( (Operadores()) 
-           (temp=Term()
-                { TokenAsignaciones.checkAsing(iden, temp);  }
-            | <PAR_I> Exp(null) <PAR_F>) 
-         )*
+        t=Term(){
+           if(t.kind==60){
+            iden=t;
+           }
+        }
+        ( 
+            (Operadores()) 
+               (temp=Term()
+                    {
+                        if (iden != null) {
+                            TokenAsignaciones.checkAsing(iden, temp);
+                        }
+
+                    }
+                | <PAR_I> temp=Exp(null) <PAR_F>) 
+        )*
         {
-            // devolvemos el primer token encontrado (t),
-            // si quieres ser más estricto podrías devolver temp (último usado)
             return t;
         }
     }
+
 

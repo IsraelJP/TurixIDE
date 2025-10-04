@@ -650,13 +650,12 @@ TokenAsignaciones.checkAsing(izq, der);
       ;
     }
     jj_consume_token(PAR_F);
-ParametroLlamadaFun();
 }
 
   final public void ParametroLlamadaFun() throws ParseException {Token izq; Token der;
     izq = jj_consume_token(IDENT);
     jj_consume_token(DOS_PUN);
-    der = Term();
+    der = Exp(izq);
 TokenAsignaciones.checkAsing(izq, der);
 }
 
@@ -794,7 +793,7 @@ TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, null);
     }
 }
 
-  final public Token Term() throws ParseException {Token t = null;
+  final public Token Term() throws ParseException {Token t = null; Token temp=null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case NUM:{
       t = jj_consume_token(NUM);
@@ -810,10 +809,10 @@ TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, null);
       jj_la1[30] = jj_gen;
       if (jj_2_6(2)) {
         LlamadoFunc();
-{if ("" != null) return null;}
+{if ("" != null) return new Token(5);}
       } else if (jj_2_7(2)) {
         ParametroLlamadaFun();
-{if ("" != null) return null;}
+{if ("" != null) return new Token(5);}
       } else {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case IDENT:{
@@ -863,6 +862,9 @@ String msg = TokenAsignaciones.checkVariable(t);
       ;
     }
     t = Term();
+if(t.kind==60){
+            iden=t;
+           }
     label_8:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -898,12 +900,14 @@ String msg = TokenAsignaciones.checkVariable(t);
       case TRUE:
       case IDENT:{
         temp = Term();
-TokenAsignaciones.checkAsing(iden, temp);
+if (iden != null) {
+                            TokenAsignaciones.checkAsing(iden, temp);
+                        }
         break;
         }
       case PAR_I:{
         jj_consume_token(PAR_I);
-        Exp(null);
+        temp = Exp(null);
         jj_consume_token(PAR_F);
         break;
         }
@@ -913,9 +917,7 @@ TokenAsignaciones.checkAsing(iden, temp);
         throw new ParseException();
       }
     }
-// devolvemos el primer token encontrado (t),
-            // si quieres ser más estricto podrías devolver temp (último usado)
-            {if ("" != null) return t;}
+{if ("" != null) return t;}
     throw new Error("Missing return statement in function");
 }
 
@@ -981,46 +983,34 @@ TokenAsignaciones.checkAsing(iden, temp);
     return false;
   }
 
-  private boolean jj_3R_LlamadoFunc_320_5_9()
- {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(60)) {
-    jj_scanpos = xsp;
-    if (jj_3R_LlamadoFunc_320_15_13()) {
-    jj_scanpos = xsp;
-    if (jj_3R_LlamadoFunc_320_37_14()) return true;
-    }
-    }
-    if (jj_scan_token(PAR_I)) return true;
-    return false;
-  }
-
   private boolean jj_3_5()
  {
     if (jj_3R_ElseIf_188_10_11()) return true;
     return false;
   }
 
-  private boolean jj_3_7()
+  private boolean jj_3R_LlamadoFunc_319_5_9()
  {
-    if (jj_3R_ParametroLlamadaFun_329_5_12()) return true;
-    return false;
-  }
-
-  private boolean jj_3_6()
- {
-    if (jj_3R_LlamadoFunc_320_5_9()) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(60)) {
+    jj_scanpos = xsp;
+    if (jj_3R_LlamadoFunc_319_15_13()) {
+    jj_scanpos = xsp;
+    if (jj_3R_LlamadoFunc_319_37_14()) return true;
+    }
+    }
+    if (jj_scan_token(PAR_I)) return true;
     return false;
   }
 
   private boolean jj_3_1()
  {
-    if (jj_3R_LlamadoFunc_320_5_9()) return true;
+    if (jj_3R_LlamadoFunc_319_5_9()) return true;
     return false;
   }
 
-  private boolean jj_3R_funcionesDefinidas_307_6_15()
+  private boolean jj_3R_funcionesDefinidas_305_6_15()
  {
     Token xsp;
     xsp = jj_scanpos;
@@ -1043,9 +1033,21 @@ TokenAsignaciones.checkAsing(iden, temp);
     return false;
   }
 
-  private boolean jj_3R_LlamadoFunc_320_37_14()
+  private boolean jj_3_7()
  {
-    if (jj_3R_Tipo_284_7_16()) return true;
+    if (jj_3R_ParametroLlamadaFun_325_5_12()) return true;
+    return false;
+  }
+
+  private boolean jj_3_6()
+ {
+    if (jj_3R_LlamadoFunc_319_5_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_LlamadoFunc_319_37_14()
+ {
+    if (jj_3R_Tipo_282_7_16()) return true;
     return false;
   }
 
@@ -1061,21 +1063,15 @@ TokenAsignaciones.checkAsing(iden, temp);
     return false;
   }
 
-  private boolean jj_3R_Tipo_288_7_21()
+  private boolean jj_3R_Tipo_286_7_21()
  {
     if (jj_scan_token(DOUBLE)) return true;
     return false;
   }
 
-  private boolean jj_3R_Tipo_287_7_20()
+  private boolean jj_3R_Tipo_285_7_20()
  {
     if (jj_scan_token(BOOL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Tipo_286_7_19()
- {
-    if (jj_scan_token(STRING)) return true;
     return false;
   }
 
@@ -1086,25 +1082,31 @@ TokenAsignaciones.checkAsing(iden, temp);
     return false;
   }
 
-  private boolean jj_3R_Tipo_285_7_18()
+  private boolean jj_3R_Tipo_284_7_19()
+ {
+    if (jj_scan_token(STRING)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_283_7_18()
  {
     if (jj_scan_token(FLOAT)) return true;
     return false;
   }
 
-  private boolean jj_3R_Tipo_284_7_16()
+  private boolean jj_3R_Tipo_282_7_16()
  {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_Tipo_284_7_17()) {
+    if (jj_3R_Tipo_282_7_17()) {
     jj_scanpos = xsp;
-    if (jj_3R_Tipo_285_7_18()) {
+    if (jj_3R_Tipo_283_7_18()) {
     jj_scanpos = xsp;
-    if (jj_3R_Tipo_286_7_19()) {
+    if (jj_3R_Tipo_284_7_19()) {
     jj_scanpos = xsp;
-    if (jj_3R_Tipo_287_7_20()) {
+    if (jj_3R_Tipo_285_7_20()) {
     jj_scanpos = xsp;
-    if (jj_3R_Tipo_288_7_21()) return true;
+    if (jj_3R_Tipo_286_7_21()) return true;
     }
     }
     }
@@ -1112,22 +1114,15 @@ TokenAsignaciones.checkAsing(iden, temp);
     return false;
   }
 
-  private boolean jj_3R_Tipo_284_7_17()
+  private boolean jj_3R_Tipo_282_7_17()
  {
     if (jj_scan_token(INT)) return true;
     return false;
   }
 
-  private boolean jj_3R_LlamadoFunc_320_15_13()
+  private boolean jj_3R_LlamadoFunc_319_15_13()
  {
-    if (jj_3R_funcionesDefinidas_307_6_15()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_ParametroLlamadaFun_329_5_12()
- {
-    if (jj_scan_token(IDENT)) return true;
-    if (jj_scan_token(DOS_PUN)) return true;
+    if (jj_3R_funcionesDefinidas_305_6_15()) return true;
     return false;
   }
 
@@ -1135,6 +1130,13 @@ TokenAsignaciones.checkAsing(iden, temp);
  {
     if (jj_scan_token(ELSE)) return true;
     if (jj_scan_token(K_I)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_ParametroLlamadaFun_325_5_12()
+ {
+    if (jj_scan_token(IDENT)) return true;
+    if (jj_scan_token(DOS_PUN)) return true;
     return false;
   }
 
