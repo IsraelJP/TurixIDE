@@ -1,6 +1,14 @@
 package codigo_intermedio;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import arbol.infijaPostfija;
 
 public final class QuadGenerator {
@@ -23,7 +31,7 @@ public final class QuadGenerator {
         }
     }
 
-    public static Result fromAssignment(String target, String infixExpr) {
+    public static Result fromAssignment(String target, String infixExpr,  Map<String, Double> variables) {
         // 1) A postfija
         String postfix = safePostfix(infixExpr);
 
@@ -31,7 +39,7 @@ public final class QuadGenerator {
         List<Quadruple> quads = buildQuadsFromPostfix(postfix, target);
 
         // 3) Evaluación estática si es posible (todo numérico)
-        Double eval = tryEvalPostfix(postfix);
+        Double eval = tryEvalPostfix(postfix,variables);
 
         return new Result(quads, postfix, eval);
     }
@@ -80,7 +88,7 @@ public final class QuadGenerator {
         // si quieres ser estricto, lanza IllegalStateException si está vacío
     }
 
-    private static Double tryEvalPostfix(String postfix) {
+    private static Double tryEvalPostfix(String postfix, Map<String, Double> variables) {
         try {
             Deque<Double> st = new ArrayDeque<>();
             String[] tokens = postfix.trim().split("\\s+");
@@ -91,8 +99,17 @@ public final class QuadGenerator {
                     Double a = st.pop();
                     st.push(apply(a, b, tk));
                 } else {
-                    // solo numéricos son evaluables
+                    // Si es número, úsalo; si es variable, busca su valor
+                try {
                     st.push(Double.valueOf(tk));
+                } catch (NumberFormatException ex) {
+                    if (variables != null && variables.containsKey(tk)) {
+                        st.push(variables.get(tk));
+                    } else {
+                        // No se puede evaluar si no se conoce el valor
+                        return null;
+                    }
+                }
                 }
             }
             if (st.size() == 1 && st.peek() != null && Double.isFinite(st.peek())) {

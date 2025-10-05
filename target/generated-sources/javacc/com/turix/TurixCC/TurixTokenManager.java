@@ -3,6 +3,7 @@
 package com.turix.TurixCC;
 import codigo_intermedio.QuadGenerator;
 import codigo_intermedio.QuadPrinter;
+import codigo_intermedio.VariableContext;
 import Semantico.TokenAsignaciones;
 import Semantico.erroresSem;
 import java.util.ArrayList;

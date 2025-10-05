@@ -18,36 +18,36 @@ public class infijaPostfija {
     }
 
     public static String convertir(String expression) {
-        Stack<Character> stack = new Stack<>();
+        Stack<String> stack = new Stack<>();
         StringBuilder output = new StringBuilder();
 
-        for (int i = 0; i < expression.length(); i++) {
-            char ch = expression.charAt(i);
+        String[] tokens = expression.trim().split("\\s+");
+        for (String token : tokens) {
+            if (token.isEmpty()) continue;
 
-            if (Character.isWhitespace(ch)) continue; // Ignorar espacios
-
-            if (Character.isLetterOrDigit(ch)) {
-                output.append(ch).append(" "); // 👈 agrega espacio después de cada operando
-            } else if (ch == '(') {
-                stack.push(ch);
-            } else if (ch == ')') {
-                while (!stack.isEmpty() && stack.peek() != '(') {
-                    output.append(stack.pop()).append(" "); // 👈 también aquí
+            if (token.matches("[a-zA-Z_][a-zA-Z0-9_]*") || token.matches("\\d+(\\.\\d+)?")) {
+                // Identificador o número
+                output.append(token).append(" ");
+            } else if (token.equals("(")) {
+                stack.push(token);
+            } else if (token.equals(")")) {
+                while (!stack.isEmpty() && !stack.peek().equals("(")) {
+                    output.append(stack.pop()).append(" ");
                 }
                 stack.pop();
-            } else if (ch == '+' || ch == '-' || ch == '*' || ch == '/') {
-                while (!stack.isEmpty() && stack.peek() != '(' &&
-                        precedence(stack.peek()) >= precedence(ch)) {
-                    output.append(stack.pop()).append(" "); // 👈 aquí también
+            } else if (token.matches("[+\\-*/%]")) {
+                while (!stack.isEmpty() && !stack.peek().equals("(") &&
+                        precedence(stack.peek().charAt(0)) >= precedence(token.charAt(0))) {
+                    output.append(stack.pop()).append(" ");
                 }
-                stack.push(ch);
+                stack.push(token);
             }
         }
 
         while (!stack.isEmpty()) {
-            output.append(stack.pop()).append(" "); // 👈 y aquí también
+            output.append(stack.pop()).append(" ");
         }
 
-        return output.toString().trim(); // eliminar espacio final
+        return output.toString().trim();
     }
 }

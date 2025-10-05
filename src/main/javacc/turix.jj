@@ -8,6 +8,7 @@ package com.turix.TurixCC;
 
 import codigo_intermedio.QuadGenerator;
 import codigo_intermedio.QuadPrinter;
+import codigo_intermedio.VariableContext;
 import Semantico.TokenAsignaciones;
 import Semantico.erroresSem;
 
@@ -18,6 +19,11 @@ public class Turix {
 
   // ===== Bloques de código intermedio ya formateados =====
   private final List<String> quadBlocks = new ArrayList<>();
+  private final VariableContext varContext = new VariableContext();
+
+    public VariableContext getVarContext() {
+        return varContext;
+    }
 
   /** Devuelve y NO limpia (la GUI decide). */
   public List<String> getQuadBlocks() {
@@ -26,9 +32,12 @@ public class Turix {
 
   /** Emite un bloque de cuádruplas para var = exprInfija (formateado como en la consola). */
   void emitQuad(String var, String exprInfija) {
-    QuadGenerator.Result r = QuadGenerator.fromAssignment(var, exprInfija);
+    QuadGenerator.Result r = QuadGenerator.fromAssignment(var, exprInfija,varContext.getAll());
     String block = QuadPrinter.formatBlock(quadBlocks.size() + 1, var, exprInfija, r);
     quadBlocks.add(block);
+    if (r.eval != null) {
+        varContext.set(var, r.eval);
+    }
   }
 
   // ===== Buffer para reconstruir la expresión INFija mientras se parsea =====
@@ -39,8 +48,9 @@ public class Turix {
 
   void emitTok(Token tok) {
     if (tok != null && tok.image != null) {
-      exprBuffer.append(tok.image).append(' ');
-    }
+    System.out.println("emitTok: " + tok.image); // DEBUG
+    exprBuffer.append(tok.image).append(' ');
+  }
   }
 
   void emitText(String s) {
