@@ -2,6 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.Turix</groupId>
@@ -12,33 +13,32 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>21</maven.compiler.release>
-
-    <!-- Cambia esto si tu clase main real tiene otro nombre/paquete -->
+    <!-- Clase principal de tu app -->
     <exec.mainClass>com.turix.TurixCC.Main</exec.mainClass>
   </properties>
 
   <build>
     <plugins>
-      <!-- Genera lexer/parser desde src/main/javacc/*.jj -->
+
+      <!-- 🔹 1. Generar lexer/parser desde src/main/javacc -->
       <plugin>
-  <groupId>org.codehaus.mojo</groupId>
-  <artifactId>javacc-maven-plugin</artifactId>
-  <version>3.1.1</version>
-  <executions>
-    <execution>
-      <phase>generate-sources</phase>
-      <goals>
-        <goal>javacc</goal>
-      </goals>
-    </execution>
-  </executions>
-  <configuration>
-    <outputDirectory>${project.build.directory}/generated-sources/javacc</outputDirectory>
-  </configuration>
-</plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>javacc-maven-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>javacc</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <outputDirectory>${project.build.directory}/generated-sources/javacc</outputDirectory>
+        </configuration>
+      </plugin>
 
-
-      <!-- Compilador (usa release 21 del bloque <properties>) -->
+      <!-- 🔹 2. Compilador de Java -->
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
@@ -47,17 +47,25 @@
         </configuration>
       </plugin>
 
-      <!-- Para ejecutar con: mvn -q clean compile exec:java -->
+      <!-- 🔹 3. Ejecutar tu programa con: mvn clean compile exec:java -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.5.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
+          <!-- Clase principal que se ejecutará -->
           <mainClass>${exec.mainClass}</mainClass>
         </configuration>
       </plugin>
 
-      <!-- Empaqueta el JAR con el Main-Class en el manifest -->
+      <!-- 🔹 4. Empaquetar JAR ejecutable -->
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.4.2</version>
@@ -70,13 +78,18 @@
           </archive>
         </configuration>
       </plugin>
+
     </plugins>
   </build>
-    <dependencies>
-        <dependency>
-            <groupId>net.java.dev.javacc</groupId>
-            <artifactId>javacc</artifactId>
-            <version>7.0.13</version>
-        </dependency>
-    </dependencies>
+
+  <!-- 🔹 Dependencias -->
+  <dependencies>
+    <!-- JavaCC (necesario para el parser Turix) -->
+    <dependency>
+      <groupId>net.java.dev.javacc</groupId>
+      <artifactId>javacc</artifactId>
+      <version>7.0.13</version>
+    </dependency>
+  </dependencies>
+
 </project>

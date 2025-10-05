@@ -1,4 +1,4 @@
-package Codigo_Intermedio;
+package arbol;
 
 import java.util.Stack;
 
@@ -17,7 +17,7 @@ public class infijaPostfija {
         }
     }
 
-    public String convertir(String expression) {
+    public static String convertir(String expression) {
         Stack<Character> stack = new Stack<>();
         StringBuilder output = new StringBuilder();
 

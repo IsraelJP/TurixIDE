@@ -9,6 +9,10 @@ import java.awt.event.ActionEvent;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import Semantico.*;
+import codigo_intermedio.QuadGenerator;
+import codigo_intermedio.QuadPrinter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main extends JFrame {
 
@@ -236,9 +240,7 @@ public class Main extends JFrame {
             }
         }
     }
-
-    /** Compila/Evalúa el contenido completo y separa errores en Léxico / Sintáctico. */
-    private void onEvaluate(ActionEvent e) {
+private void onEvaluate(ActionEvent e) {
     // --- Estado inicial ---
     TokenAsignaciones.tabla.clear();
     TokenAsignaciones.SetTables(); // prepara tablas/ambiente semántico
@@ -256,7 +258,7 @@ public class Main extends JFrame {
 
     int erroresLex = 0;
     int erroresSin = 0;
-    int erroresSemanticos=0; 
+    int erroresSemanticos = 0;
 
     // ============================================================
     // 1) LÉXICO (sobre TODO el texto, independiente del parser)
@@ -278,11 +280,10 @@ public class Main extends JFrame {
                     "✘ Léxico: Error en la línea %d, col %d. Token inválido => '%s'%n",
                     t.beginLine, t.beginColumn, t.image
                 ));
-                // no listamos como token válido
                 continue;
             }
 
-            // Solo mostramos tokens válidos
+            // Solo tokens válidos
             lexArea.append(String.format(
                 "Línea %d, Col %d: Token %-18s => '%s'%n",
                 t.beginLine, t.beginColumn, TokenCase.getTokenNombre(t.kind), t.image
@@ -292,8 +293,7 @@ public class Main extends JFrame {
             erroresLex++;
             lexArea.append("✘ Léxico: " + tme.getMessage() + "\n");
             try {
-                // intentamos saltar 1 char para no quedar atascados
-                scsLex.readChar();
+                scsLex.readChar(); // saltar 1 char
             } catch (IOException ex) {
                 break;
             }
@@ -308,19 +308,19 @@ public class Main extends JFrame {
 
     // ============================================================
     // 2) SINTÁCTICO + SEMÁNTICO (UN SOLO PARSEO con recuperación)
-    //    - Las acciones semánticas se ejecutan durante el parse.
-    //    - Al final, imprimimos la bolsa de errores semánticos.
     // ============================================================
     erroresSem.resetErrores(); // vacía la bolsa ANTES de parsear
 
+    Turix parser = null;
     try {
-        Turix parser = new Turix(new StringReader(text));
+        parser = new Turix(new StringReader(text));
         boolean continuar = true;
 
         while (continuar) {
             try {
                 parser.Start();     // intenta parsear hasta EOF
                 continuar = false;  // si no lanzó excepción, llegó a EOF
+
             } catch (ParseException pe) {
                 erroresSin++;
                 synArea.append("✘ Sintaxis: " + pe.getMessage() + "\n");
@@ -331,8 +331,7 @@ public class Main extends JFrame {
                     if (next.kind == TurixConstants.EOF) {
                         continuar = false;
                     } else {
-                        // consume uno y sigue (pequeño "panic-mode" local)
-                        parser.token = parser.getToken(2);
+                        parser.token = parser.getToken(2); // consume uno
                     }
                 } catch (Throwable ignore) {
                     continuar = false;
@@ -340,11 +339,8 @@ public class Main extends JFrame {
 
             } catch (TokenMgrError tme) {
                 // Error léxico detectado durante el parse
-                erroresSin++; // lo contamos como obstáculo de parseo
+                erroresSin++;
                 synArea.append("✘ Sintaxis/Léxico en parser: " + tme.getMessage() + "\n");
-                // Intento conservador: salir del bucle para no quedar en estado inconsistente
-                // Si quieres ser más agresivo, podrías re-crear el parser desde
-                // la misma cadena y posicionarte, pero requiere más soporte en el scanner.
                 continuar = false;
             }
         }
@@ -363,10 +359,25 @@ public class Main extends JFrame {
         for (String err : erroresSem.getErrores()) {
             semArea.append("✘ Semántico: " + err + "\n");
         }
-        erroresSemanticos=erroresSem.getErrores().size();
-        semArea.append("✘ Total de errores semánticos: "
-                + erroresSemanticos + "\n");
-        
+        erroresSemanticos = erroresSem.getErrores().size();
+        semArea.append("✘ Total de errores semánticos: " + erroresSemanticos + "\n");
+    }
+
+    // ============================================================
+    // 3.5) CÓDIGO INTERMEDIO (desde el parser)
+    // ============================================================
+    if (parser != null) {
+        if (parser.getQuadBlocks().isEmpty()) {
+            codIntArea.append("No se encontraron asignaciones.\n");
+        } else {
+            for (String block : parser.getQuadBlocks()) {
+             codIntArea.append(block);
+             codIntArea.append(System.lineSeparator());
+             System.out.println(block); // println ya agrega salto de línea
+         }
+        }
+    } else {
+        codIntArea.append("No se pudieron obtener las cuadruplas (parser nulo).\n");
     }
 
     // ============================================================
@@ -380,9 +391,11 @@ public class Main extends JFrame {
 
     setStatus(String.format(
         "Compilación terminada: %d errores léxicos, %d errores sintácticos, %d errores semánticos",
-        erroresLex, erroresSin,erroresSemanticos
+        erroresLex, erroresSin, erroresSemanticos
     ));
 }
+
+
 
 
 

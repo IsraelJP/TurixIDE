@@ -1,4 +1,4 @@
-package Codigo_Intermedio;
+package arbol;
         
 public class Nodo {
     private Object valor;  // double para operandos, char para operadores

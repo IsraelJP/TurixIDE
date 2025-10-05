@@ -1,4 +1,3 @@
-
 options {
   STATIC = false;
   UNICODE_INPUT = true;
@@ -6,19 +5,49 @@ options {
 
 PARSER_BEGIN(Turix)
 package com.turix.TurixCC;
-import Semantico.*;
+
+import codigo_intermedio.QuadGenerator;
+import codigo_intermedio.QuadPrinter;
+import Semantico.TokenAsignaciones;
+import Semantico.erroresSem;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Turix {
-    public static void main(String[] args) throws ParseException {
-        System.out.println("Ingresa una expresión (ej: 10+20-5). Ctrl+D para terminar:");
-        Turix parser = new Turix(System.in);
-        parser.Start();
-        System.out.println("✔ Expresión válida");
-    }
-    public Turix(SimpleCharStream stream) {
-    this(new TurixTokenManager(stream));
-}
 
+  // ===== Bloques de código intermedio ya formateados =====
+  private final List<String> quadBlocks = new ArrayList<>();
+
+  /** Devuelve y NO limpia (la GUI decide). */
+  public List<String> getQuadBlocks() {
+    return quadBlocks;
+  }
+
+  /** Emite un bloque de cuádruplas para var = exprInfija (formateado como en la consola). */
+  void emitQuad(String var, String exprInfija) {
+    QuadGenerator.Result r = QuadGenerator.fromAssignment(var, exprInfija);
+    String block = QuadPrinter.formatBlock(quadBlocks.size() + 1, var, exprInfija, r);
+    quadBlocks.add(block);
+  }
+
+  // ===== Buffer para reconstruir la expresión INFija mientras se parsea =====
+  private final StringBuilder exprBuffer = new StringBuilder();
+
+  void exprBufClear() { exprBuffer.setLength(0); }
+  String exprBufGet() { return exprBuffer.toString().trim(); }
+
+  void emitTok(Token tok) {
+    if (tok != null && tok.image != null) {
+      exprBuffer.append(tok.image).append(' ');
+    }
+  }
+
+  void emitText(String s) {
+    if (s != null && !s.isEmpty()) {
+      exprBuffer.append(s).append(' ');
+    }
+  }
 }
 PARSER_END(Turix)
 
@@ -27,256 +56,279 @@ SKIP : {
 }
 
 TOKEN : {
-    
+
     < NUM:( (["0"-"9"])+ )>
-    |< NUM_DEC:(( ["0"-"9"] )+ ( "." (["0"-"9"])+ ) )>
-    |<STRING_LITERAL : 
-        // String multilínea 
+  | < NUM_DEC:(( ["0"-"9"] )+ ( "." (["0"-"9"])+ ) )>
+  | <STRING_LITERAL :
+        // String multilínea
         "\"\"\"" (~["\""] | "\"" | "\"\"")* "\"\"\""
       |
         // String normal de una línea
         "\"" ( "\\" | ~["\"","\\","\n","\r"] )* "\""
-     >
-     
-    //OPERADORES MATEMATICOS
-    | < MAS: "+" >
-    | < MENOS: "-" >    
-    | < MULTIPLICACION: "*" > 
-    | < DIVISION: "/" > 
-    | < MODULO: "%" > 
-    | <DOUBLE: "Double">
-    | <IGUAL: "=">
-    | <SQRT: "sqrt">  
-    | <POW: "pow">     
-    | <COS: "cos">     
-    | <SIN: "sin">     
-    | <LOG: "log"> 
+    >
 
-    //TIPOS DE DATO
-    | <INT: "Int">
-    | <FLOAT: "Float">
-    | <STRING: "String">
-    | <BOOL: "Bool">
-    | <CHARACTER: "Character">
-   
+  // OPERADORES MATEMÁTICOS
+  | < MAS: "+" >
+  | < MENOS: "-" >
+  | < MULTIPLICACION: "*" >
+  | < DIVISION: "/" >
+  | < MODULO: "%" >
+  | < DOUBLE: "Double" >
+  | < IGUAL: "=" >
+  | < SQRT: "sqrt" >
+  | < POW: "pow" >
+  | < COS: "cos" >
+  | < SIN: "sin" >
+  | < LOG: "log" >
 
+  // TIPOS DE DATO
+  | < INT: "Int" >
+  | < FLOAT: "Float" >
+  | < STRING: "String" >
+  | < BOOL: "Bool" >
+  | < CHARACTER: "Character" >
 
-    //OPERADORES LOGICOS
-    | <AND: "&&">
-    | <NOT: "!">
-    | <OR: "||">
-    
-    //OPERADORES DE REALCION
-    | < REL_OP : "==" | "!=" | ">=" | "<=" | ">" | "<" >
+  // OPERADORES LÓGICOS
+  | < AND: "&&" >
+  | < NOT: "!" >
+  | < OR: "||" >
 
-    //Simbolos
-    | <DOS_PUN: ":">
-    |<FLECHA : "->">
-    |<COMILLA : "\"">
-    |<COMA : ",">
-    
+  // RELACIONALES
+  | < REL_OP : "==" | "!=" | ">=" | "<=" | ">" | "<" >
 
-    // Palabras reservadas para declaraciones
-    | <FUNC: "func">
-    | <LET: "let">
-    | <VAR: "var">
-    | <TERMINATOR: "terminator">
-    | <SEPARATOR: "separator">
-    | <PRINT: "print">
-    | <READLINE: "readLine">
+  // Símbolos
+  | < DOS_PUN: ":" >
+  | < FLECHA : "->" >
+  | < COMILLA : "\"" >
+  | < COMA : "," >
 
-    // Palabras reservadas para control de flujo
-    | <BREAK: "break">
-    | <CASE: "case">
-    | <DEFAULT_KEYWORD: "default"> 
-    | <REPEAT: "repeat">
-    | <ELSE: "else">
-    | <FOR: "for">
-    | <IF: "if">
-    | <IN: "in">
-    | <RETURN: "return">
-    | <SWITCH: "switch">
-    | <WHERE: "where">
-    | <WHILE: "while">
-    
-    //ABRIR Y CERRAR
-    | <K_I: "{"> 
-    | <K_F: "}">
-    | <PAR_I: "(">
-    | <PAR_F: ")">
-    | <COR_I: "[">
-    | <COR_F: "]">
+  // Palabras reservadas
+  | < FUNC: "func" >
+  | < LET: "let" >
+  | < VAR: "var" >
+  | < TERMINATOR: "terminator" >
+  | < SEPARATOR: "separator" >
+  | < PRINT: "print" >
+  | < READLINE: "readLine" >
 
+  // Control de flujo
+  | < BREAK: "break" >
+  | < CASE: "case" >
+  | < DEFAULT_KEYWORD: "default" >
+  | < REPEAT: "repeat" >
+  | < ELSE: "else" >
+  | < FOR: "for" >
+  | < IF: "if" >
+  | < IN: "in" >
+  | < RETURN: "return" >
+  | < SWITCH: "switch" >
+  | < WHERE: "where" >
+  | < WHILE: "while" >
 
-    // Palabras reservadas para tipos y contexto
-    
-    | <FALSE: "false">
-    | <TRUE: "true">
+  // Paréntesis/llaves/corchetes
+  | < K_I: "{" >
+  | < K_F: "}" >
+  | < PAR_I: "(" >
+  | < PAR_F: ")" >
+  | < COR_I: "[" >
+  | < COR_F: "]" >
 
-    //IDENTIFCADOR
-    | < IDENT : "`" ( ["A"-"Z","a"-"z","0"-"9","_"] )+ "`"
+  // Literales booleanos
+  | < FALSE: "false" >
+  | < TRUE: "true" >
+
+  // IDENTIFICADOR (tu definición original)
+  | < IDENT : "`" ( ["A"-"Z","a"-"z","0"-"9","_"] )+ "`"
     | ( ["A"-"Z","a"-"z","_"] ) ( ["A"-"Z","a"-"z","0"-"9","_"] )* >
-    
-    //ERRORES
-    | < ERROR: (["0"-"9"])+ ("." (["0"-"9"])+){2,} >
-    | < ERROROPERA:  "=!" | "=>" | "=<" >
-    |< ERROR_IDENT :
-    (["A"-"Z","a"-"z","_"])(["A"-"Z","a"-"z","0"-"9","_"])*
-    (~["A"-"Z","a"-"z","0"-"9","_"," ","\t","\r","\n",
-      "!","\"","%","(",")","*","+",",","-","/",":",
-      "=","[","]","{","}","&","|","?",">","<"])
-    (["A"-"Z","a"-"z","0"-"9","_"])* |
-    
-    // Solo caracteres inválidos aislados
-    (~["A"-"Z","a"-"z","_"," ","\t","\r","\n",
-      "!","\"","%","(",")","*","+",",","-","/",":",
-      "=","[","]","{","}","&","|","?",">","<","0"-"9"])+
->
-     
-    }
 
-//CUERPO DEL PROGRAMA 
-    void Start() :
-    {
-        TokenAsignaciones.SetTables();
-    }
-    {
-        ListaSentencias() <EOF>
-    }
+  // ERRORES
+  | < ERROR: (["0"-"9"])+ ("." (["0"-"9"])+){2,} >
+  | < ERROROPERA:  "=!" | "=>" | "=<" >
+  | < ERROR_IDENT :
+      (["A"-"Z","a"-"z","_"])(["A"-"Z","a"-"z","0"-"9","_"])*
+      (~["A"-"Z","a"-"z","0"-"9","_"," ","\t","\r","\n",
+        "!","\"","%","(",")","*","+",",","-","/",":",
+        "=","[","]","{","}","&","|","?",">","<"])
+      (["A"-"Z","a"-"z","0"-"9","_"])*
+      |
+      (~["A"-"Z","a"-"z","_"," ","\t","\r","\n",
+        "!","\"","%","(",")","*","+",",","-","/",":",
+        "=","[","]","{","}","&","|","?",">","<","0"-"9"])+
+    >
+}
 
-    void ListaSentencias() :
-    {}
-    {
-        ( Sentencia() )*
-    }
-
-    void Sentencia() :
-    {}
-    {
-         DeclaracionVar()
-       | DeclaracionLet()
-       | DeclaracionIF()
-       | Func()
-       | RetornoSentencia()
-       | Imprimir()
-       | SentenciaRepeat()
-       | LOOKAHEAD(2) LlamadoFunc()
-       | Asignacion()
-       | Switch()
-       | SentenciaWhile()
-       | Exp(null)
-
-    }
-
-
-//Declaraciones
-    //IF
-    void DeclaracionIF() :
-    {}
-    {
-        <IF> Condicion() <K_I> ListaSentencias() <K_F> (LOOKAHEAD(2) DecElse()| LOOKAHEAD(2) ElseIf())?
-    }
-
-    void DecElse() :
-    {}
-    {
-        <ELSE> <K_I> ListaSentencias() <K_F>
-    }
-    void ElseIf():
-    {}
-    {
-         <ELSE> <IF> Condicion() <K_I> ListaSentencias() <K_F> (LOOKAHEAD(2) DecElse()| LOOKAHEAD(2) ElseIf())?
-    }
-
-    //SWITCH
-    void Switch():
-    {}
-    {
-        <SWITCH> Exp(null) <K_I> (Case())* (DefaultCase())? <K_F>
-    }
-    void Case():
-    {}
-    {
-        <CASE> Exp(null) <DOS_PUN> ListaSentencias() 
-    }
-    
-    void DefaultCase():
-    {} 
-    {
-        <DEFAULT_KEYWORD> <DOS_PUN> ListaSentencias()
-    }
-
-    //REPEAT
-    void SentenciaRepeat():
-    {}
-    {
-        <REPEAT> <K_I> ListaSentencias() <K_F> <WHILE> Condicion() 
-    }
-    
-    //WHILE
-    void SentenciaWhile() :
-    {}
-    {
-        <WHILE> Condicion() <K_I> ListaSentencias() <K_F>
-    }
-
-
-
-    //VAR 
-    void DeclaracionVar() :
-    { Token id; Token tipo=null; Token exp=null;}
-    {
-        <VAR> id=<IDENT> ( <DOS_PUN> tipo=Tipo() )? ( <IGUAL> exp=Exp(id) )?
-        {
-            TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, exp);
-        }
-    }
-
-    
-    //LET
-    void DeclaracionLet() :
-    {}
-    {
-        <LET> <IDENT> ( <DOS_PUN> Tipo() )? ( <IGUAL> Exp(null) )?
-    }
-    void ListaLet():
-    {}
-    {
-    DeclaracionLet() (<COMA> DeclaracionLet())*
-    }
-
-    //ASIGNACION 
-
-    void Asignacion():
-    { Token izq; Token der; }
-    {
-        izq=<IDENT> <IGUAL> der=Exp(null)
-        {
-            TokenAsignaciones.checkAsing(izq, der);
-        }
-    }
-
-
-
-
-//CONDICIONAL
-    void Condicion() :
-    {}
-    {
-       ( Exp(null) (<REL_OP> Exp(null) ((<AND> | <OR> | <NOT>)  (CondicionAnidada()|Exp(null)) (<REL_OP> Exp(null))?)* )? ) | ListaLet()
-    }
-
-    void CondicionAnidada(): 
-    {}
-    {
-    <PAR_I> Condicion() <PAR_F>
-    }
-
-
-//Tipos de DATO
-    Token Tipo() :
+// =============================
+// CUERPO DEL PROGRAMA
+// =============================
+void Start() :
 {
-    Token t = null;
+    TokenAsignaciones.SetTables();
+}
+{
+    {
+      // limpiar bloques de compilaciones previas (por si reusan el parser)
+      this.getQuadBlocks().clear();
+    }
+    ListaSentencias() <EOF>
+}
+
+void ListaSentencias() :
+{}
+{
+    ( Sentencia() )*
+}
+
+void Sentencia() :
+{}
+{
+     DeclaracionVar()
+   | DeclaracionLet()
+   | DeclaracionIF()
+   | Func()
+   | RetornoSentencia()
+   | Imprimir()
+   | SentenciaRepeat()
+   | LOOKAHEAD(2) LlamadoFunc()
+   | Asignacion()
+   | Switch()
+   | SentenciaWhile()
+   | Exp(null)
+}
+
+// =============================
+// DECLARACIONES / CONTROL
+// =============================
+
+// IF
+void DeclaracionIF() :
+{}
+{
+    <IF> Condicion() <K_I> ListaSentencias() <K_F> (LOOKAHEAD(2) DecElse()| LOOKAHEAD(2) ElseIf())?
+}
+
+void DecElse() :
+{}
+{
+    <ELSE> <K_I> ListaSentencias() <K_F>
+}
+
+void ElseIf():
+{}
+{
+     <ELSE> <IF> Condicion() <K_I> ListaSentencias() <K_F> (LOOKAHEAD(2) DecElse()| LOOKAHEAD(2) ElseIf())?
+}
+
+// SWITCH
+void Switch():
+{}
+{
+    <SWITCH> Exp(null) <K_I> (Case())* (DefaultCase())? <K_F>
+}
+void Case():
+{}
+{
+    <CASE> Exp(null) <DOS_PUN> ListaSentencias()
+}
+
+void DefaultCase():
+{}
+{
+    <DEFAULT_KEYWORD> <DOS_PUN> ListaSentencias()
+}
+
+// REPEAT
+void SentenciaRepeat():
+{}
+{
+    <REPEAT> <K_I> ListaSentencias() <K_F> <WHILE> Condicion()
+}
+
+// WHILE
+void SentenciaWhile() :
+{}
+{
+    <WHILE> Condicion() <K_I> ListaSentencias() <K_F>
+}
+
+// =============================
+// VAR / LET
+// =============================
+
+// VAR (con inicialización opcional)
+void DeclaracionVar() :
+{ Token id; Token tipo=null; Token exp=null;}
+{
+    <VAR> id=<IDENT> ( <DOS_PUN> tipo=Tipo() )?
+    (
+      <IGUAL>
+      {
+        exprBufClear(); // capturar la infija que viene
+      }
+      exp=Exp(id)
+      {
+         TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, exp);
+         // emitir cuádruplas de la inicialización
+         emitQuad(id.image, exprBufGet());
+      }
+    )?
+    {
+        // si no hubo = expr; inserta el símbolo sin valor
+        if (exp == null) {
+            TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, null);
+        }
+    }
+}
+
+// LET (con inicialización opcional)
+void DeclaracionLet() :
+{ Token id=null; }
+{
+    <LET> id=<IDENT> ( <DOS_PUN> Tipo() )?
+    ( <IGUAL> { exprBufClear(); } Exp(null) { emitQuad(id.image, exprBufGet()); } )?
+}
+
+void ListaLet():
+{}
+{
+  DeclaracionLet() (<COMA> DeclaracionLet())*
+}
+
+// ASIGNACIÓN
+void Asignacion():
+{ Token izq; Token der; }
+{
+    izq=<IDENT> <IGUAL>
+    {
+      exprBufClear(); // limpiar buffer antes de leer la expr
+    }
+    der=Exp(null)
+    {
+        TokenAsignaciones.checkAsing(izq, der);
+        emitQuad(izq.image, exprBufGet());
+    }
+}
+
+// =============================
+// CONDICIÓN
+// =============================
+void Condicion() :
+{}
+{
+   ( Exp(null) (<REL_OP> Exp(null) ((<AND> | <OR> | <NOT>)  (CondicionAnidada()|Exp(null)) (<REL_OP> Exp(null))? )* )? ) | ListaLet()
+}
+
+void CondicionAnidada():
+{}
+{
+  <PAR_I> Condicion() <PAR_F>
+}
+
+// =============================
+// TIPOS
+// =============================
+Token Tipo() :
+{
+  Token t = null;
 }
 {
       t=<INT>      { return t; }
@@ -286,158 +338,170 @@ TOKEN : {
     | t=<DOUBLE>   { return t; }
 }
 
+// =============================
+// OPERADORES (no usada para armar infija)
+// =============================
+void Operadores():
+{}
+{
+  <MAS> | <MENOS> | <MULTIPLICACION> | <DIVISION> | <MODULO>
+}
 
-//OPERADORES
+// =============================
+// FUNCIONES
+// =============================
+void funcionesDefinidas():
+{}
+{
+   <SQRT> | <POW> | <COS> | <SIN> | <LOG> | <READLINE>
+}
 
-    void Operadores():
-    {}
-    {
-    <MAS> | <MENOS> | <MULTIPLICACION> | <DIVISION> | <MODULO> 
-    }
+void Func() :
+{}
+{
+    <FUNC> <IDENT> <PAR_I> (Parametros())? <PAR_F> (Retorno())? <K_I> ListaSentencias() <K_F>
+}
 
+void LlamadoFunc():
+{}
+{
+   ( <IDENT> | funcionesDefinidas() | Tipo() ) <PAR_I> (ListaExp())? <PAR_F>
+}
 
-
-//FUNCIONES
-
-    void funcionesDefinidas():
-    {}
-    {
-     <SQRT> | <POW> |<COS>| <SIN>| <LOG>| <READLINE> 
-    }
-    
-    void Func() :
-    {}
-    {
-        <FUNC> <IDENT> <PAR_I> (Parametros())? <PAR_F> (Retorno())? <K_I> ListaSentencias() <K_F>
-    }
-
-    //
-    void LlamadoFunc():
-    {}
-    {
-    
-    (<IDENT> |funcionesDefinidas() |Tipo()) <PAR_I> (ListaExp())? <PAR_F>
-    }
-
-    void ParametroLlamadaFun():
-    {Token izq; Token der; }
-    {
-    izq=<IDENT> <DOS_PUN> der=Exp(izq){
+void ParametroLlamadaFun():
+{ Token izq; Token der; }
+{
+  izq=<IDENT> <DOS_PUN> der=Exp(izq) {
     TokenAsignaciones.checkAsing(izq, der);
-    }
-    }
-    
-    //RETURN
-    void Retorno() :
-    {}
+  }
+}
+
+// RETURN
+void Retorno() :
+{}
+{
+   <FLECHA> Tipo()
+}
+
+void RetornoSentencia():
+{}
+{
+   <RETURN> { exprBufClear(); } Exp(null)
+}
+
+// PRINT
+void Imprimir():
+{}
+{
+   <PRINT> <PAR_I> ListaExpPrint() <PAR_F>
+}
+
+void ListaExpPrint():
+{}
+{
+    { exprBufClear(); }
+    Exp(null)
     {
-       <FLECHA> Tipo()
+      // target virtual para visualizar cuádruplas de print
+      emitQuad("_resultado_print", exprBufGet());
     }
-
-    void RetornoSentencia():
-    {}
-    {
-        <RETURN> Exp(null) 
-    }
-    
-    //PRINT
-    void Imprimir():
-    {}
-    {
-        <PRINT> <PAR_I> ListaExpPrint()  <PAR_F>
-    }
-
-    void ListaExpPrint():
-    {}
-    {
-        Exp(null) (<COMA> (Exp(null) | Opcion_Print()  ))*
-    }
-
-    void Opcion_Print():
-    {}
-    {
-        (  <TERMINATOR> <DOS_PUN> Exp(null) ) |
-        (  <SEPARATOR> <DOS_PUN> Exp(null) ) 
-
-    }
-
-
-//PARAMETROS
-    void Parametros() :
-    {}
-    {
-       Parametro() (<COMA> Parametro())*
-    }
-
-    void Parametro() :
-    {Token id; Token tipo; }
-    {
-       id=<IDENT> <DOS_PUN> tipo=Tipo(){
-       TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, null);
-       }
-    }
-
-
-//TERMINOS Y EXPRESIONES
-    void ListaExp():
-    {}
-    {
-        Exp(null) (<COMA> Exp(null))*
-    }
-    
-   Token Term() :
-    { Token t = null; Token temp=null;}
-    {   
-
-        t=<NUM> { return t; }
-        | t=<NUM_DEC> { return t; }
-        | LOOKAHEAD(2) LlamadoFunc() { return new Token(5); }
-        |LOOKAHEAD(2) ParametroLlamadaFun(){ return new Token(5); }
-        |t=<IDENT> { 
-            String msg = TokenAsignaciones.checkVariable(t);
-            if (!msg.equals(" ")) {
-                erroresSem.addError(msg);
-            }
-            return t; 
-        }
-      
-      
-      | t=<TRUE> { return t; }
-      | t=<FALSE> { return t; }
-      | t=<STRING_LITERAL> { return t; }
-      
-    }
-
-
-
-    //EXPRESIONES
-    Token Exp(Token iden) :
-    {
-        Token t = null;
-        Token temp = null;
-
-    }
-    {
-        ( <MENOS> )?
-        t=Term(){
-           if(t.kind==60){
-            iden=t;
-           }
-        }
-        ( 
-            (Operadores()) 
-               (temp=Term()
-                    {
-                        if (iden != null) {
-                            TokenAsignaciones.checkAsing(iden, temp);
-                        }
-
-                    }
-                | <PAR_I> temp=Exp(null) <PAR_F>) 
-        )*
+    (
+      <COMA>
+      (
+        { exprBufClear(); }
+        Exp(null)
         {
-            return t;
+          emitQuad("_resultado_print", exprBufGet());
+        }
+        | Opcion_Print()
+      )
+    )*
+}
+
+void Opcion_Print():
+{}
+{
+    (  <TERMINATOR> <DOS_PUN> Exp(null) )
+  | (  <SEPARATOR>  <DOS_PUN> Exp(null) )
+}
+
+// =============================
+// PARÁMETROS
+// =============================
+void Parametros() :
+{}
+{
+   Parametro() (<COMA> Parametro())*
+}
+
+void Parametro() :
+{ Token id; Token tipo; }
+{
+   id=<IDENT> <DOS_PUN> tipo=Tipo() {
+     TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, null);
+   }
+}
+
+// =============================
+// LISTAS / EXPRESIONES
+// =============================
+void ListaExp():
+{}
+{
+    Exp(null) (<COMA> Exp(null))*
+}
+
+// ===== Termino (agrega al buffer) =====
+Token Term() :
+{ Token t = null; }
+{
+    t=<NUM>                 { emitTok(t); return t; }
+  | t=<NUM_DEC>             { emitTok(t); return t; }
+  | LOOKAHEAD(2) LlamadoFunc() { emitText("call"); return new Token(5); }
+  | LOOKAHEAD(2) ParametroLlamadaFun() { emitText("param"); return new Token(5); }
+  | t=<IDENT> {
+      String msg = TokenAsignaciones.checkVariable(t);
+      if (!msg.equals(" ")) {
+          erroresSem.addError(msg);
+      }
+      emitTok(t);
+      return t;
+    }
+  | t=<TRUE>                { emitTok(t); return t; }
+  | t=<FALSE>               { emitTok(t); return t; }
+  | t=<STRING_LITERAL>      { emitTok(t); return t; }
+}
+
+// ===== Expresión (construye INFija en exprBuffer) =====
+Token Exp(Token iden) :
+{
+    Token t = null;
+    Token temp = null;
+    Token op = null;
+}
+{
+    ( <MENOS> { emitText("-"); } )?
+    t=Term() {
+        // Conserva tu lógica original: si el token es de cierto tipo
+        if (t.kind == 60) {
+            iden = t;
         }
     }
-
-
+    (
+      ( op=<MAS> | op=<MENOS> | op=<MULTIPLICACION> | op=<DIVISION> | op=<MODULO> )
+      {
+        // INFija: escribe el operador ANTES de consumir el operando derecho
+        emitTok(op);
+      }
+      (
+          temp=Term()
+            {
+              if (iden != null) {
+                  TokenAsignaciones.checkAsing(iden, temp);
+              }
+            }
+        | <PAR_I> { emitText("("); } temp=Exp(null) <PAR_F> { emitText(")"); }
+      )
+    )*
+    { return t; }
+}
