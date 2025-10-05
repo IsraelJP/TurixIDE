@@ -17,6 +17,7 @@ public class Main extends JFrame {
     private final JTextArea lexArea    = new JTextArea(10, 80);
     private final JTextArea synArea    = new JTextArea(10, 80);
     private final JTextArea semArea    = new JTextArea(10, 80);
+    private final JTextArea codIntArea    = new JTextArea(10, 80);
 
     // Estado
     private File currentFile = null;
@@ -33,6 +34,8 @@ public class Main extends JFrame {
         @Override public void actionPerformed(ActionEvent e){
             lexArea.setText("");
             synArea.setText("");
+            semArea.setText("");
+            codIntArea.setText("");
             setStatus("Pantallas limpiadas");
         } };
     private final Action actZoomIn  = new AbstractAction("Zoom +")   { { putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control EQUALS")); }
@@ -57,24 +60,28 @@ public class Main extends JFrame {
         lexArea.setFont(mono);
         synArea.setFont(mono);
         semArea.setFont(mono);
+        codIntArea.setFont(mono);
         lexArea.setEditable(true);
         synArea.setEditable(true);
         semArea.setEditable(true);
         lexArea.setBorder(new EmptyBorder(8,8,8,8));
         synArea.setBorder(new EmptyBorder(8,8,8,8));
         semArea.setBorder(new EmptyBorder(8,8,8,8));
+        codIntArea.setBorder(new EmptyBorder(8,8,8,8));
         // Scrolls
         JScrollPane inputScroll = new JScrollPane(inputArea);
         inputScroll.setRowHeaderView(new LineNumberView(inputArea));
         JScrollPane lexScroll = new JScrollPane(lexArea);
         JScrollPane synScroll = new JScrollPane(synArea);
         JScrollPane semScroll = new JScrollPane(semArea);
+        JScrollPane codIntScroll = new JScrollPane(codIntArea);
 
         // Tabs
         JTabbedPane tabs = new JTabbedPane();
         tabs.addTab("Léxico", lexScroll);
         tabs.addTab("Sintáctico", synScroll);
         tabs.addTab("Semántico", semScroll);
+        tabs.addTab("Código Intermedio", codIntScroll);
         // Editor panel
         JPanel editorPanel = new JPanel(new BorderLayout(6,6));
        // Línea donde creas el label superior del editor:
@@ -245,6 +252,7 @@ public class Main extends JFrame {
     lexArea.setText("== Análisis Léxico ==\n");
     synArea.setText("== Análisis Sintáctico ==\n");
     semArea.setText("== Análisis Semántico ==\n");
+    codIntArea.setText("== Análisis Código Intermedio ==\n");
 
     int erroresLex = 0;
     int erroresSin = 0;
