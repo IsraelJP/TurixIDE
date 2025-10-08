@@ -89,35 +89,50 @@ public final class QuadGenerator {
     }
 
     private static Double tryEvalPostfix(String postfix, Map<String, Double> variables) {
-        try {
-            Deque<Double> st = new ArrayDeque<>();
-            String[] tokens = postfix.trim().split("\\s+");
-            for (String tk : tokens) {
-                if (tk.isEmpty()) continue;
-                if (isOperator(tk)) {
-                    Double b = st.pop();
-                    Double a = st.pop();
-                    st.push(apply(a, b, tk));
-                } else {
-                    // Si es número, úsalo; si es variable, busca su valor
+    try {
+        Deque<Double> st = new ArrayDeque<>();
+        String[] tokens = postfix.trim().split("\\s+");
+        for (String tk : tokens) {
+            if (tk.isEmpty()) continue;
+
+            if (isOperator(tk)) {
+                Double b = st.pop();
+                Double a = st.pop();
+                st.push(apply(a, b, tk));
+            } else {
+                // Si es número, booleano o variable conocida, úsalo
                 try {
+                    // ✅ Intentar convertir a número
                     st.push(Double.valueOf(tk));
                 } catch (NumberFormatException ex) {
-                    if (variables != null && variables.containsKey(tk)) {
+
+                    // ✅ Aceptar valores booleanos como 1 (true) y 0 (false)
+                    if (tk.equalsIgnoreCase("true")) {
+                        st.push(1.0);
+                    } else if (tk.equalsIgnoreCase("false")) {
+                        st.push(0.0);
+                    }
+
+                    // ✅ Buscar variables conocidas en el mapa
+                    else if (variables != null && variables.containsKey(tk)) {
                         st.push(variables.get(tk));
-                    } else {
-                        // No se puede evaluar si no se conoce el valor
+                    }
+
+                    // ❌ No se puede evaluar si no se conoce el valor
+                    else {
                         return null;
                     }
                 }
-                }
             }
-            if (st.size() == 1 && st.peek() != null && Double.isFinite(st.peek())) {
-                return st.peek();
-            }
-        } catch (Exception ignore) {}
-        return null;
-    }
+        }
+
+        if (st.size() == 1 && st.peek() != null && Double.isFinite(st.peek())) {
+            return st.peek();
+        }
+    } catch (Exception ignore) {}
+    return null;
+}
+
 
     private static Double apply(Double a, Double b, String op) {
         switch (op) {

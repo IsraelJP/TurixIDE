@@ -412,8 +412,12 @@ void ListaExpPrint():
     { exprBufClear(); }
     Exp(null)
     {
-      // target virtual para visualizar cuádruplas de print
-      emitQuad("_resultado_print", exprBufGet());
+        String expr = exprBufGet().trim();
+
+        // Solo generar cuádruplos si NO es literal de texto
+        if (!(expr.startsWith("\"") && expr.endsWith("\""))) {
+            emitQuad("_resultado_print", expr);
+        }
     }
     (
       <COMA>
@@ -421,12 +425,16 @@ void ListaExpPrint():
         { exprBufClear(); }
         Exp(null)
         {
-          emitQuad("_resultado_print", exprBufGet());
+            String expr2 = exprBufGet().trim();
+            if (!(expr2.startsWith("\"") && expr2.endsWith("\""))) {
+                emitQuad("_resultado_print", expr2);
+            }
         }
         | Opcion_Print()
       )
     )*
 }
+
 
 void Opcion_Print():
 {}

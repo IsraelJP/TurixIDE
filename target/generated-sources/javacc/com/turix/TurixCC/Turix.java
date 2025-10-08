@@ -751,8 +751,12 @@ exprBufClear();
   final public void ListaExpPrint() throws ParseException {
 exprBufClear();
     Exp(null);
-// target virtual para visualizar cuádruplas de print
-      emitQuad("_resultado_print", exprBufGet());
+String expr = exprBufGet().trim();
+
+        // Solo generar cuádruplos si NO es literal de texto
+        if (!(expr.startsWith("\"") && expr.endsWith("\""))) {
+            emitQuad("_resultado_print", expr);
+        }
     label_5:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -786,7 +790,10 @@ exprBufClear();
       case IDENT:{
 exprBufClear();
         Exp(null);
-emitQuad("_resultado_print", exprBufGet());
+String expr2 = exprBufGet().trim();
+            if (!(expr2.startsWith("\"") && expr2.endsWith("\""))) {
+                emitQuad("_resultado_print", expr2);
+            }
         break;
         }
       case TERMINATOR:
@@ -1207,6 +1214,18 @@ emitText(")");
     return false;
   }
 
+  private boolean jj_3_7()
+ {
+    if (jj_3R_ParametroLlamadaFun_384_3_12()) return true;
+    return false;
+  }
+
+  private boolean jj_3_6()
+ {
+    if (jj_3R_LlamadoFunc_378_4_9()) return true;
+    return false;
+  }
+
   private boolean jj_3_3()
  {
     if (jj_3R_ElseIf_228_6_11()) return true;
@@ -1238,18 +1257,6 @@ emitText(")");
     }
     }
     if (jj_scan_token(PAR_I)) return true;
-    return false;
-  }
-
-  private boolean jj_3_7()
- {
-    if (jj_3R_ParametroLlamadaFun_384_3_12()) return true;
-    return false;
-  }
-
-  private boolean jj_3_6()
- {
-    if (jj_3R_LlamadoFunc_378_4_9()) return true;
     return false;
   }
 
