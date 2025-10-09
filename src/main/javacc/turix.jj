@@ -280,10 +280,14 @@ void DeclaracionVar() :
      TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : TurixConstants.INT, null);
 
      // 2) Validar con la EXPRESIÓN COMPLETA (no con el primer token)
-     TokenAsignaciones.checkAsing(id, exprBufGet());
+    int __semBefore = erroresSem.getErrores().size();
+    TokenAsignaciones.checkAsing(id, exprBufGet());
 
-     // 3) Generar cuádruplas
-     emitQuad(id.image, exprBufGet());
+    // 3) Generar cuádruplas solo si no se agregó error semántico
+    if (erroresSem.getErrores().size() == __semBefore) {
+        emitQuad(id.image, exprBufGet());
+    }
+
   }
 )?
 {
@@ -320,8 +324,11 @@ void Asignacion():
     der=Exp(null)
     {
         // Validar contra la EXPRESIÓN INFija reconstruida
+        int __semBefore = erroresSem.getErrores().size();
         TokenAsignaciones.checkAsing(izq, exprBufGet());
-        emitQuad(izq.image, exprBufGet());
+        if (erroresSem.getErrores().size() == __semBefore) {
+            emitQuad(izq.image, exprBufGet());
+}
     }
 }
 
