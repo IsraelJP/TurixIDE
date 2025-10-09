@@ -42,6 +42,26 @@ public class QuadPrinter {
             sb.append(String.join(" ", res.postfix));
         }
         sb.append(NL).append(NL);
+        // ======= Traza shunting-yard (pila paso a paso) =======
+        if (res != null && res.infixToPostfixTrace != null && !res.infixToPostfixTrace.isEmpty()) {
+            sb.append("Traza shunting-yard (pila paso a paso)").append(NL);
+            sb.append(String.format("%-6s | %-10s | %-25s | %-18s | %-18s%s",
+                    "Paso", "Token", "Acción", "Pila", "Salida", NL));
+            sb.append("------------------------------------------------------------------------------------------").append(NL);
+
+            for (arbol.infijaPostfija.TraceStep st : res.infixToPostfixTrace) {
+                sb.append(String.format("%-6d | %-10s | %-25s | %-18s | %-18s%s",
+                        st.step,
+                        st.token,
+                        st.action,
+                        st.stackSnapshot,
+                        st.outputSnapshot,
+                        NL
+                ));
+            }
+            sb.append(NL);
+            sb.append("----------------------------------------").append(NL);
+        }
 
         String head = String.format("%-12s | %-12s | %-8s | %-12s",
                 "Resultado", "Operando 1", "Operador", "Operando 2");

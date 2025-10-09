@@ -1,148 +1,108 @@
 package codigo_intermedio;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
 import arbol.infijaPostfija;
 
 public final class QuadGenerator {
 
     private static final Set<String> OPS = new HashSet<>(Arrays.asList(
-        "+", "-", "*", "/", "%", "^"
+            "+", "-", "*", "/", "%", "^", "="
     ));
-
-    private QuadGenerator() {}
+    private QuadGenerator(){}
 
     public static class Result {
         public final List<Quadruple> quads;
         public final String postfix;
-        public final Double eval; // null si no es evaluable estáticamente
+        public final Double eval;
 
-        private Result(List<Quadruple> quads, String postfix, Double eval) {
+        // NUEVOS/Necesarios para impresión:
+        public final List<infijaPostfija.TraceStep> infixToPostfixTrace;
+        public final List<String> evalStackTrace;
+
+        private Result(List<Quadruple> quads, String postfix, Double eval,
+                       List<infijaPostfija.TraceStep> infixToPostfixTrace,
+                       List<String> evalStackTrace) {
             this.quads = quads;
             this.postfix = postfix;
             this.eval = eval;
+            this.infixToPostfixTrace = infixToPostfixTrace;
+            this.evalStackTrace = evalStackTrace;
         }
     }
 
-    public static Result fromAssignment(String target, String infixExpr,  Map<String, Double> variables) {
-        // 1) A postfija
-        String postfix = safePostfix(infixExpr);
+    public static Result fromAssignment(String target, String infixExpr, Map<String, Double> variables) {
+        // 1) Infija -> Postfija con traza
+        infijaPostfija.PostfixTrace tr = infijaPostfija.convertirConTraza(infixExpr);
+        String postfix = tr.postfix;
 
-        // 2) Cuádruplas desde postfija con temporales
-        List<Quadruple> quads = buildQuadsFromPostfix(postfix, target);
+        // 2) Generar cuádruplas y traza de pila de evaluación
+        List<String> evalTrace = new ArrayList<>();
+        List<Quadruple> quads = buildQuadsFromPostfix(postfix, target, evalTrace);
 
-        // 3) Evaluación estática si es posible (todo numérico)
-        Double eval = tryEvalPostfix(postfix,variables);
+        // 3) Evaluación estática (si aplica)
+        Double eval = tryEvalPostfix(postfix, variables);
 
-        return new Result(quads, postfix, eval);
+        return new Result(quads, postfix, eval, tr.steps, evalTrace);
     }
 
-    private static String safePostfix(String infix) {
-        try {
-            return  infijaPostfija.convertir(infix);
-        } catch (Exception e) {
-            return "<error postfija: " + e.getMessage() + ">";
-        }
-    }
-
-    private static List<Quadruple> buildQuadsFromPostfix(String postfix, String targetVar) {
+    private static List<Quadruple> buildQuadsFromPostfix(String postfix, String targetVar, List<String> evalTrace) {
         List<Quadruple> quads = new ArrayList<>();
-        if (postfix.startsWith("<error")) return quads;
+        if (postfix == null || postfix.isBlank()) return quads;
 
         Deque<String> stack = new ArrayDeque<>();
         int tempCounter = 1;
+        int paso = 1;
 
-        String[] tokens = postfix.trim().split("\\s+");
-        for (String tk : tokens) {
+        for (String tk : postfix.trim().split("\\s+")) {
             if (tk.isEmpty()) continue;
             if (isOperator(tk)) {
-                String b = pop(stack);
-                String a = pop(stack);
-                String temp = "temporal" + tempCounter++;
-                quads.add(new Quadruple(temp, a, tk, b));
-                stack.push(temp);
+                String b = stack.pop();
+                String a = stack.pop();
+                String t = "t" + (tempCounter++);
+                quads.add(new Quadruple(t, a, tk, b));
+                stack.push(t);
+                evalTrace.add(String.format("Paso %02d: aplicar '%s' => push(%s) | pila=%s", paso++, tk, t, stack));
             } else {
                 stack.push(tk);
+                evalTrace.add(String.format("Paso %02d: push(%s) | pila=%s", paso++, tk, stack));
             }
         }
 
         String top = stack.isEmpty() ? "" : stack.pop();
-        // asignación final
         quads.add(new Quadruple(targetVar, top, "=", ""));
+        evalTrace.add(String.format("Paso %02d: asignar %s = %s", paso, targetVar, top));
         return quads;
     }
 
-    private static boolean isOperator(String t) {
-        return OPS.contains(t);
-    }
+    private static boolean isOperator(String s) { return OPS.contains(s); }
 
-    private static String pop(Deque<String> st) {
-        return st.isEmpty() ? "" : st.pop();
-        // si quieres ser estricto, lanza IllegalStateException si está vacío
-    }
-
-    private static Double tryEvalPostfix(String postfix, Map<String, Double> variables) {
-    try {
-        Deque<Double> st = new ArrayDeque<>();
-        String[] tokens = postfix.trim().split("\\s+");
-        for (String tk : tokens) {
-            if (tk.isEmpty()) continue;
-
-            if (isOperator(tk)) {
-                Double b = st.pop();
-                Double a = st.pop();
-                st.push(apply(a, b, tk));
-            } else {
-                // Si es número, booleano o variable conocida, úsalo
-                try {
-                    // ✅ Intentar convertir a número
-                    st.push(Double.valueOf(tk));
-                } catch (NumberFormatException ex) {
-
-                    // ✅ Aceptar valores booleanos como 1 (true) y 0 (false)
-                    if (tk.equalsIgnoreCase("true")) {
-                        st.push(1.0);
-                    } else if (tk.equalsIgnoreCase("false")) {
-                        st.push(0.0);
+    private static Double tryEvalPostfix(String postfix, Map<String, Double> vars) {
+        if (postfix == null || postfix.isBlank()) return null;
+        try {
+            Deque<Double> st = new ArrayDeque<>();
+            for (String tk : postfix.trim().split("\\s+")) {
+                if (OPS.contains(tk) && !tk.equals("=")) {
+                    double b = st.pop(), a = st.pop();
+                    switch (tk) {
+                        case "+": st.push(a + b); break;
+                        case "-": st.push(a - b); break;
+                        case "*": st.push(a * b); break;
+                        case "/": st.push(a / b); break;
+                        case "%": st.push(a % b); break;
+                        case "^": st.push(Math.pow(a, b)); break;
                     }
-
-                    // ✅ Buscar variables conocidas en el mapa
-                    else if (variables != null && variables.containsKey(tk)) {
-                        st.push(variables.get(tk));
-                    }
-
-                    // ❌ No se puede evaluar si no se conoce el valor
-                    else {
-                        return null;
+                } else {
+                    try {
+                        st.push(Double.valueOf(tk));
+                    } catch (NumberFormatException e) {
+                        if (vars != null && vars.containsKey(tk)) st.push(vars.get(tk));
+                        else return null;
                     }
                 }
             }
-        }
-
-        if (st.size() == 1 && st.peek() != null && Double.isFinite(st.peek())) {
-            return st.peek();
-        }
-    } catch (Exception ignore) {}
-    return null;
-}
-
-
-    private static Double apply(Double a, Double b, String op) {
-        switch (op) {
-            case "+": return a + b;
-            case "-": return a - b;
-            case "*": return a * b;
-            case "/": return a / b;
-            case "%": return a % b;
-            case "^": return Math.pow(a, b);
-            default: throw new IllegalArgumentException("Operador no soportado: " + op);
+            return (st.size() == 1) ? st.peek() : null;
+        } catch (Exception e) {
+            return null;
         }
     }
 }

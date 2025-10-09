@@ -1,6 +1,7 @@
 com\turix\TurixCC\TokenMgrError.class
 com\turix\TurixCC\TurixTokenManager.class
 Semantico\TokenAsignaciones.class
+arbol\infijaPostfija$PostfixTrace.class
 com\turix\TurixCC\Main$5.class
 com\turix\TurixCC\ParseException.class
 arbol\ArbolExpresion.class
@@ -26,6 +27,7 @@ com\turix\TurixCC\TokenCase.class
 com\turix\TurixCC\Main$1.class
 com\turix\TurixCC\Main$LineNumberView$1.class
 com\turix\TurixCC\SimpleCharStream.class
+arbol\infijaPostfija$TraceStep.class
 com\turix\TurixCC\Turix.class
 com\turix\TurixCC\Main$LineNumberView.class
 com\turix\TurixCC\Main$3.class
