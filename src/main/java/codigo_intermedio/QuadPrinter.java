@@ -15,7 +15,8 @@ public final class QuadPrinter {
         sb.append("              Código intermedio #").append(index).append(NL);
         sb.append("--------------------------------------------------").append(NL);
         sb.append(NL);
-        sb.append("  ").append(targetVar).append(" = ").append(infix).append(";").append(NL);
+        sb.append("  ").append(targetVar).append(" = ").append(infix).append(NL);
+        sb.append("  Expresión postfija: ").append(String.join(" ", res.postfix)).append(NL);
         sb.append(NL);
 
         // Tabla
@@ -35,6 +36,7 @@ public final class QuadPrinter {
         }
 
         sb.append(NL);
+        
         if (res.eval != null) {
             // Mostrar reducción final si se puede evaluar
             String pretty = (Math.floor(res.eval) == res.eval) ?
