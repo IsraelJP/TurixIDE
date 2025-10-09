@@ -17,9 +17,9 @@ public class Turix implements TurixConstants {
   private final List<String> quadBlocks = new ArrayList<>();
   private final VariableContext varContext = new VariableContext();
 
-    public VariableContext getVarContext() {
-        return varContext;
-    }
+  public VariableContext getVarContext() {
+    return varContext;
+  }
 
   /** Devuelve y NO limpia (la GUI decide). */
   public List<String> getQuadBlocks() {
@@ -28,11 +28,11 @@ public class Turix implements TurixConstants {
 
   /** Emite un bloque de cuádruplas para var = exprInfija (formateado como en la consola). */
   void emitQuad(String var, String exprInfija) {
-    QuadGenerator.Result r = QuadGenerator.fromAssignment(var, exprInfija,varContext.getAll());
+    QuadGenerator.Result r = QuadGenerator.fromAssignment(var, exprInfija, varContext.getAll());
     String block = QuadPrinter.formatBlock(quadBlocks.size() + 1, var, exprInfija, r);
     quadBlocks.add(block);
     if (r.eval != null) {
-        varContext.set(var, r.eval);
+      varContext.set(var, r.eval);
     }
   }
 
@@ -44,9 +44,9 @@ public class Turix implements TurixConstants {
 
   void emitTok(Token tok) {
     if (tok != null && tok.image != null) {
-    System.out.println("emitTok: " + tok.image); // DEBUG
-    exprBuffer.append(tok.image).append(' ');
-  }
+      // System.out.println("emitTok: " + tok.image); // DEBUG opcional
+      exprBuffer.append(tok.image).append(' ');
+    }
   }
 
   void emitText(String s) {
@@ -248,6 +248,7 @@ public class Turix implements TurixConstants {
 // SWITCH
   final public void Switch() throws ParseException {
     jj_consume_token(SWITCH);
+exprBufClear();
     Exp(null);
     jj_consume_token(K_I);
     label_2:
@@ -276,6 +277,7 @@ public class Turix implements TurixConstants {
 }
 
   final public void Case() throws ParseException {
+exprBufClear();
     jj_consume_token(CASE);
     Exp(null);
     jj_consume_token(DOS_PUN);
@@ -331,9 +333,14 @@ public class Turix implements TurixConstants {
 exprBufClear(); // capturar la infija que viene
 
       exp = Exp(id);
-TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, exp);
-         // emitir cuádruplas de la inicialización
-         emitQuad(id.image, exprBufGet());
+// 1) Inserta primero el símbolo (para que exista durante la validación de la derecha)
+     TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : TurixConstants.INT, null);
+
+     // 2) Validar con la EXPRESIÓN COMPLETA (no con el primer token)
+     TokenAsignaciones.checkAsing(id, exprBufGet());
+
+     // 3) Generar cuádruplas
+     emitQuad(id.image, exprBufGet());
       break;
       }
     default:
@@ -341,9 +348,9 @@ TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, exp);
       ;
     }
 // si no hubo = expr; inserta el símbolo sin valor
-        if (exp == null) {
-            TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, null);
-        }
+    if (exp == null) {
+        TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : TurixConstants.INT, null);
+    }
 }
 
 // LET (con inicialización opcional)
@@ -399,7 +406,8 @@ emitQuad(id.image, exprBufGet());
 exprBufClear(); // limpiar buffer antes de leer la expr
 
     der = Exp(null);
-TokenAsignaciones.checkAsing(izq, der);
+// Validar contra la EXPRESIÓN INFija reconstruida
+        TokenAsignaciones.checkAsing(izq, exprBufGet());
         emitQuad(izq.image, exprBufGet());
 }
 
@@ -426,10 +434,12 @@ TokenAsignaciones.checkAsing(izq, der);
     case FALSE:
     case TRUE:
     case IDENT:{
+exprBufClear();
       Exp(null);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case REL_OP:{
         jj_consume_token(REL_OP);
+exprBufClear();
         Exp(null);
         label_4:
         while (true) {
@@ -485,6 +495,7 @@ TokenAsignaciones.checkAsing(izq, der);
           case FALSE:
           case TRUE:
           case IDENT:{
+exprBufClear();
             Exp(null);
             break;
             }
@@ -496,6 +507,7 @@ TokenAsignaciones.checkAsing(izq, der);
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
           case REL_OP:{
             jj_consume_token(REL_OP);
+exprBufClear();
             Exp(null);
             break;
             }
@@ -724,8 +736,9 @@ TokenAsignaciones.checkAsing(izq, der);
   final public void ParametroLlamadaFun() throws ParseException {Token izq; Token der;
     izq = jj_consume_token(IDENT);
     jj_consume_token(DOS_PUN);
+exprBufClear();
     der = Exp(izq);
-TokenAsignaciones.checkAsing(izq, der);
+TokenAsignaciones.checkAsing(izq, exprBufGet());
 }
 
 // RETURN
@@ -814,12 +827,14 @@ String expr2 = exprBufGet().trim();
     case TERMINATOR:{
       jj_consume_token(TERMINATOR);
       jj_consume_token(DOS_PUN);
+exprBufClear();
       Exp(null);
       break;
       }
     case SEPARATOR:{
       jj_consume_token(SEPARATOR);
       jj_consume_token(DOS_PUN);
+exprBufClear();
       Exp(null);
       break;
       }
@@ -855,7 +870,7 @@ String expr2 = exprBufGet().trim();
     id = jj_consume_token(IDENT);
     jj_consume_token(DOS_PUN);
     tipo = Tipo();
-TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : 20, null);
+TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : TurixConstants.INT, null);
 }
 
 // =============================
@@ -896,10 +911,18 @@ emitTok(t); {if ("" != null) return t;}
       jj_la1[30] = jj_gen;
       if (jj_2_6(2)) {
         LlamadoFunc();
-emitText("call"); {if ("" != null) return new Token(5);}
+emitText("call");
+        Token fake = new Token();
+        fake.kind = TurixConstants.IDENT; // un tipo no-literal para compatibilidad
+        fake.image = "call";
+        {if ("" != null) return fake;}
       } else if (jj_2_7(2)) {
         ParametroLlamadaFun();
-emitText("param"); {if ("" != null) return new Token(5);}
+emitText("param");
+        Token fake = new Token();
+        fake.kind = TurixConstants.IDENT;
+        fake.image = "param";
+        {if ("" != null) return fake;}
       } else {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case IDENT:{
@@ -938,8 +961,8 @@ emitTok(t); {if ("" != null) return t;}
 }
 
 // ===== Expresión (construye INFija en exprBuffer) =====
-  final public Token Exp(Token iden) throws ParseException {Token t = null;
-    Token temp = null;
+  final public Token Exp(Token iden) throws ParseException {Token t = null;      // primer término
+    Token temp = null;   // último término/expresión consumido a la derecha
     Token op = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case MENOS:{
@@ -952,8 +975,8 @@ emitText("-");
       ;
     }
     t = Term();
-// Conserva tu lógica original: si el token es de cierto tipo
-        if (t.kind == 60) {
+// Si el primer término es IDENT, conserva en 'iden' si te sirve en otros lugares.
+        if (t.kind == TurixConstants.IDENT) {
             iden = t;
         }
     label_8:
@@ -1017,10 +1040,8 @@ emitText("-");
       case FALSE:
       case TRUE:
       case IDENT:{
-        temp = Term();
-if (iden != null) {
-                  TokenAsignaciones.checkAsing(iden, temp);
-              }
+        // Term() y sus subreglas deben encargarse de empujar sus lexemas al exprBuffer
+                  temp = Term();
         break;
         }
       case PAR_I:{
@@ -1037,7 +1058,8 @@ emitText(")");
         throw new ParseException();
       }
     }
-{if ("" != null) return t;}
+// Devuelve el último token consumido si existe; si no, el primero (compatibilidad)
+        {if ("" != null) return (temp != null ? temp : t);}
     throw new Error("Missing return statement in function");
 }
 
@@ -1104,7 +1126,134 @@ emitText(")");
     return false;
   }
 
-  private boolean jj_3R_funcionesDefinidas_366_4_15()
+  private boolean jj_3R_DecElse_222_5_10()
+ {
+    if (jj_scan_token(ELSE)) return true;
+    if (jj_scan_token(K_I)) return true;
+    return false;
+  }
+
+  private boolean jj_3_2()
+ {
+    if (jj_3R_DecElse_222_5_10()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_355_7_21()
+ {
+    if (jj_scan_token(DOUBLE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_354_7_20()
+ {
+    if (jj_scan_token(BOOL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_353_7_19()
+ {
+    if (jj_scan_token(STRING)) return true;
+    return false;
+  }
+
+  private boolean jj_3_5()
+ {
+    if (jj_3R_ElseIf_228_6_11()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_352_7_18()
+ {
+    if (jj_scan_token(FLOAT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_351_7_16()
+ {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_Tipo_351_7_17()) {
+    jj_scanpos = xsp;
+    if (jj_3R_Tipo_352_7_18()) {
+    jj_scanpos = xsp;
+    if (jj_3R_Tipo_353_7_19()) {
+    jj_scanpos = xsp;
+    if (jj_3R_Tipo_354_7_20()) {
+    jj_scanpos = xsp;
+    if (jj_3R_Tipo_355_7_21()) return true;
+    }
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_351_7_17()
+ {
+    if (jj_scan_token(INT)) return true;
+    return false;
+  }
+
+  private boolean jj_3_7()
+ {
+    if (jj_3R_ParametroLlamadaFun_391_3_12()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_LlamadoFunc_385_16_13()
+ {
+    if (jj_3R_funcionesDefinidas_373_4_15()) return true;
+    return false;
+  }
+
+  private boolean jj_3_6()
+ {
+    if (jj_3R_LlamadoFunc_385_4_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3_1()
+ {
+    if (jj_3R_LlamadoFunc_385_4_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_ParametroLlamadaFun_391_3_12()
+ {
+    if (jj_scan_token(IDENT)) return true;
+    if (jj_scan_token(DOS_PUN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_LlamadoFunc_385_4_9()
+ {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(60)) {
+    jj_scanpos = xsp;
+    if (jj_3R_LlamadoFunc_385_16_13()) {
+    jj_scanpos = xsp;
+    if (jj_3R_LlamadoFunc_385_39_14()) return true;
+    }
+    }
+    if (jj_scan_token(PAR_I)) return true;
+    return false;
+  }
+
+  private boolean jj_3_3()
+ {
+    if (jj_3R_ElseIf_228_6_11()) return true;
+    return false;
+  }
+
+  private boolean jj_3_4()
+ {
+    if (jj_3R_DecElse_222_5_10()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_funcionesDefinidas_373_4_15()
  {
     Token xsp;
     xsp = jj_scanpos;
@@ -1127,136 +1276,9 @@ emitText(")");
     return false;
   }
 
-  private boolean jj_3R_LlamadoFunc_378_39_14()
+  private boolean jj_3R_LlamadoFunc_385_39_14()
  {
-    if (jj_3R_Tipo_344_7_16()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_DecElse_222_5_10()
- {
-    if (jj_scan_token(ELSE)) return true;
-    if (jj_scan_token(K_I)) return true;
-    return false;
-  }
-
-  private boolean jj_3_2()
- {
-    if (jj_3R_DecElse_222_5_10()) return true;
-    return false;
-  }
-
-  private boolean jj_3_5()
- {
-    if (jj_3R_ElseIf_228_6_11()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Tipo_348_7_21()
- {
-    if (jj_scan_token(DOUBLE)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Tipo_347_7_20()
- {
-    if (jj_scan_token(BOOL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Tipo_346_7_19()
- {
-    if (jj_scan_token(STRING)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Tipo_345_7_18()
- {
-    if (jj_scan_token(FLOAT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Tipo_344_7_16()
- {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_Tipo_344_7_17()) {
-    jj_scanpos = xsp;
-    if (jj_3R_Tipo_345_7_18()) {
-    jj_scanpos = xsp;
-    if (jj_3R_Tipo_346_7_19()) {
-    jj_scanpos = xsp;
-    if (jj_3R_Tipo_347_7_20()) {
-    jj_scanpos = xsp;
-    if (jj_3R_Tipo_348_7_21()) return true;
-    }
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_Tipo_344_7_17()
- {
-    if (jj_scan_token(INT)) return true;
-    return false;
-  }
-
-  private boolean jj_3_1()
- {
-    if (jj_3R_LlamadoFunc_378_4_9()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_LlamadoFunc_378_16_13()
- {
-    if (jj_3R_funcionesDefinidas_366_4_15()) return true;
-    return false;
-  }
-
-  private boolean jj_3_7()
- {
-    if (jj_3R_ParametroLlamadaFun_384_3_12()) return true;
-    return false;
-  }
-
-  private boolean jj_3_6()
- {
-    if (jj_3R_LlamadoFunc_378_4_9()) return true;
-    return false;
-  }
-
-  private boolean jj_3_3()
- {
-    if (jj_3R_ElseIf_228_6_11()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_ParametroLlamadaFun_384_3_12()
- {
-    if (jj_scan_token(IDENT)) return true;
-    if (jj_scan_token(DOS_PUN)) return true;
-    return false;
-  }
-
-  private boolean jj_3_4()
- {
-    if (jj_3R_DecElse_222_5_10()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_LlamadoFunc_378_4_9()
- {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(60)) {
-    jj_scanpos = xsp;
-    if (jj_3R_LlamadoFunc_378_16_13()) {
-    jj_scanpos = xsp;
-    if (jj_3R_LlamadoFunc_378_39_14()) return true;
-    }
-    }
-    if (jj_scan_token(PAR_I)) return true;
+    if (jj_3R_Tipo_351_7_16()) return true;
     return false;
   }
 
