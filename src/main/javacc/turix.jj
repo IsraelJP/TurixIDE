@@ -31,14 +31,39 @@ public class Turix {
   }
 
   /** Emite un bloque de cuádruplas para var = exprInfija (formateado como en la consola). */
-  void emitQuad(String var, String exprInfija) {
-    QuadGenerator.Result r = QuadGenerator.fromAssignment(var, exprInfija, varContext.getAll());
-    String block = QuadPrinter.formatBlock(quadBlocks.size() + 1, var, exprInfija, r);
-    quadBlocks.add(block);
-    if (r.eval != null) {
-      varContext.set(var, r.eval);
+  // === Helper para emitir bloque de código intermedio ===
+    void emitQuad(String var, String exprInfija) {
+        // Genera quads + evalúa en tiempo de compilación con el contexto actual
+        QuadGenerator.Result r = QuadGenerator.fromAssignment(var, exprInfija, varContext.getAll());
+
+        // Detectar tipo declarado del lado izquierdo desde la tabla semántica
+        Integer tipoL = (Integer) Semantico.TokenAsignaciones.tabla.get(var);
+
+        Double overrideEval = null;
+        Double toStore = null;
+
+        if (r.eval != null) {
+            // Por defecto guardamos el double evaluado
+            toStore = r.eval;
+
+            // Si el destino es INT, truncamos hacia 0 tanto el mostrado como el almacenado
+            if (tipoL != null && tipoL == TurixConstants.INT) {
+                int entero = (int) (r.eval.doubleValue());
+                overrideEval = (double) entero;
+                toStore = overrideEval;
+            }
+        }
+
+        // Imprimir bloque, usando el override si aplica
+        String block = QuadPrinter.formatBlock(quadBlocks.size() + 1, var, exprInfija, r, overrideEval);
+        quadBlocks.add(block);
+
+        // Actualiza contexto de variables para evaluación posterior
+        if (toStore != null) {
+            varContext.set(var, toStore);
+        }
     }
-  }
+
 
   // ===== Buffer para reconstruir la expresión INFija mientras se parsea =====
   private final StringBuilder exprBuffer = new StringBuilder();
@@ -266,38 +291,35 @@ void SentenciaWhile() :
 
 // VAR (con inicialización opcional)
 void DeclaracionVar() :
-{ Token id; Token tipo=null; Token exp=null;}
+{ Token id=null; Token tipo=null; Token expTok=null; }
 {
     <VAR> id=<IDENT> ( <DOS_PUN> tipo=Tipo() )?
-(
-  <IGUAL>
-  {
-    exprBufClear(); // capturar la infija que viene
-  }
-  exp=Exp(id)
-  {
-     // 1) Inserta primero el símbolo (para que exista durante la validación de la derecha)
-     TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : TurixConstants.INT, null);
+    (
+      <IGUAL>
+      {
+        exprBufClear();
+      }
+      expTok=Exp(null)
+      {
+         // Inserta símbolo antes de validar
+         Semantico.TokenAsignaciones.InsertarSimbolo(id, (tipo != null ? tipo.kind : TurixConstants.INT), null);
 
-     // 2) Validar con la EXPRESIÓN COMPLETA (no con el primer token)
-    int __semBefore = erroresSem.getErrores().size();
-    TokenAsignaciones.checkAsing(id, exprBufGet());
-
-    // 3) Generar cuádruplas solo si no se agregó error semántico
-    if (erroresSem.getErrores().size() == __semBefore) {
-        emitQuad(id.image, exprBufGet());
-    }
-
-  }
-)?
-{
-    // si no hubo = expr; inserta el símbolo sin valor
-    if (exp == null) {
-        TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : TurixConstants.INT, null);
+         // Valida semántica y condiciona la generación
+         int __semBefore = erroresSem.getErrores().size();
+         Semantico.TokenAsignaciones.checkAsing(id, exprBufGet());
+         if (erroresSem.getErrores().size() == __semBefore) {
+             emitQuad(id.image, exprBufGet());
+         }
+      }
+    )?
+    {
+      // Si no hubo asignación, solo declara
+      if (expTok == null) {
+         Semantico.TokenAsignaciones.InsertarSimbolo(id, (tipo != null ? tipo.kind : TurixConstants.INT), null);
+      }
     }
 }
 
-}
 
 // LET (con inicialización opcional)
 void DeclaracionLet() :
@@ -314,23 +336,26 @@ void ListaLet():
 }
 
 // ASIGNACIÓN
-void Asignacion():
-{ Token izq; Token der; }
+void Asignacion() :
+{ Token izq=null; }
 {
-    izq=<IDENT> <IGUAL>
+    izq=<IDENT>
+    <IGUAL>
     {
-      exprBufClear(); // limpiar buffer antes de leer la expr
+        exprBufClear();
     }
-    der=Exp(null)
+    Exp(null)
     {
-        // Validar contra la EXPRESIÓN INFija reconstruida
+        // Valida semántica y condiciona generación
         int __semBefore = erroresSem.getErrores().size();
-        TokenAsignaciones.checkAsing(izq, exprBufGet());
+        Semantico.TokenAsignaciones.checkAsing(izq, exprBufGet());
         if (erroresSem.getErrores().size() == __semBefore) {
             emitQuad(izq.image, exprBufGet());
-}
+        }
+        // else: hubo error semántico -> no generes cuádruplas de esta asignación
     }
 }
+
 
 // =============================
 // CONDICIÓN

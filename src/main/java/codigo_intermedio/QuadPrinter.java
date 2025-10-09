@@ -1,62 +1,73 @@
+// package <tu.package.de.codigo_intermedio>;
 package codigo_intermedio;
 
-import java.util.List;
+import java.util.Objects;
 
-public final class QuadPrinter {
+public class QuadPrinter {
 
-    private QuadPrinter() {}
+    private static String repeat(char c, int n) {
+        StringBuilder sb = new StringBuilder(n);
+        for (int i = 0; i < n; i++) sb.append(c);
+        return sb.toString();
+    }
 
+    private static String safe(Object o) {
+        return (o == null) ? "" : Objects.toString(o);
+    }
+
+    /**
+     * Versión original que mantengo para compatibilidad.
+     */
     public static String formatBlock(int index, String targetVar, String infix, QuadGenerator.Result res) {
+        return formatBlock(index, targetVar, infix, res, null);
+    }
+
+    /**
+     * Nueva sobrecarga que permite forzar el valor evaluado (overrideEval)
+     * para el renglón "target := valor".
+     */
+    public static String formatBlock(int index, String targetVar, String infix,
+                                     QuadGenerator.Result res, Double overrideEval) {
         String NL = System.lineSeparator();
         StringBuilder sb = new StringBuilder();
 
-        // Encabezado
         sb.append("--------------------------------------------------").append(NL);
         sb.append("              Código intermedio #").append(index).append(NL);
         sb.append("--------------------------------------------------").append(NL);
         sb.append(NL);
-        sb.append("  ").append(targetVar).append(" = ").append(infix).append(NL);
-        sb.append("  Expresión postfija: ").append(String.join(" ", res.postfix)).append(NL);
-        sb.append(NL);
 
-        // Tabla
+        sb.append("  ").append(targetVar).append(" = ").append(infix).append(NL);
+        sb.append("  Expresión postfija: ");
+        if (res != null && res.postfix != null) {
+            sb.append(String.join(" ", res.postfix));
+        }
+        sb.append(NL).append(NL);
+
         String head = String.format("%-12s | %-12s | %-8s | %-12s",
                 "Resultado", "Operando 1", "Operador", "Operando 2");
         sb.append(head).append(NL);
         sb.append(repeat('-', head.length())).append(NL);
 
-        List<Quadruple> qs = res.quads;
-        for (int i = 0; i < qs.size(); i++) {
-            Quadruple q = qs.get(i);
-            // Igual que tu ejemplo: las operaciones intermedias con temporales,
-            // y la última fila es la asignación "a = temporalN"
-            String row = String.format("%-12s | %-12s | %-8s | %-12s",
-                    q.result, safe(q.arg1), safe(q.op), safe(q.arg2));
-            sb.append(row).append(NL);
+        if (res != null && res.quads != null) {
+            for (int i = 0; i < res.quads.size(); i++) {
+                var q = res.quads.get(i);
+                String row = String.format("%-12s | %-12s | %-8s | %-12s",
+                        safe(q.result), safe(q.arg1), safe(q.op), safe(q.arg2));
+                sb.append(row).append(NL);
+            }
         }
-
         sb.append(NL);
-        
-        if (res.eval != null) {
-            // Mostrar reducción final si se puede evaluar
-            String pretty = (Math.floor(res.eval) == res.eval) ?
-                    String.valueOf(res.eval.intValue()) : res.eval.toString();
+
+        Double shown = (overrideEval != null) ? overrideEval : (res != null ? res.eval : null);
+        if (shown != null) {
+            String pretty = (Math.floor(shown) == shown)
+                    ? String.valueOf(shown.intValue())
+                    : shown.toString();
             sb.append(targetVar).append(" := ").append(pretty).append(NL);
         } else {
-            // No evaluable estáticamente
             sb.append(targetVar).append(" := ").append("<no evaluable en compilación>").append(NL);
         }
 
         return sb.toString();
-    }
-
-    private static String repeat(char c, int n) {
-        StringBuilder s = new StringBuilder(n);
-        for (int i = 0; i < n; i++) s.append(c);
-        return s.toString();
-    }
-
-    private static String safe(String s) {
-        return s == null ? "" : s;
     }
 }

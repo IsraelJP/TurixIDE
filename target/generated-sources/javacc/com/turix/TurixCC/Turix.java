@@ -27,14 +27,39 @@ public class Turix implements TurixConstants {
   }
 
   /** Emite un bloque de cuádruplas para var = exprInfija (formateado como en la consola). */
-  void emitQuad(String var, String exprInfija) {
-    QuadGenerator.Result r = QuadGenerator.fromAssignment(var, exprInfija, varContext.getAll());
-    String block = QuadPrinter.formatBlock(quadBlocks.size() + 1, var, exprInfija, r);
-    quadBlocks.add(block);
-    if (r.eval != null) {
-      varContext.set(var, r.eval);
+  // === Helper para emitir bloque de código intermedio ===
+    void emitQuad(String var, String exprInfija) {
+        // Genera quads + evalúa en tiempo de compilación con el contexto actual
+        QuadGenerator.Result r = QuadGenerator.fromAssignment(var, exprInfija, varContext.getAll());
+
+        // Detectar tipo declarado del lado izquierdo desde la tabla semántica
+        Integer tipoL = (Integer) Semantico.TokenAsignaciones.tabla.get(var);
+
+        Double overrideEval = null;
+        Double toStore = null;
+
+        if (r.eval != null) {
+            // Por defecto guardamos el double evaluado
+            toStore = r.eval;
+
+            // Si el destino es INT, truncamos hacia 0 tanto el mostrado como el almacenado
+            if (tipoL != null && tipoL == TurixConstants.INT) {
+                int entero = (int) (r.eval.doubleValue());
+                overrideEval = (double) entero;
+                toStore = overrideEval;
+            }
+        }
+
+        // Imprimir bloque, usando el override si aplica
+        String block = QuadPrinter.formatBlock(quadBlocks.size() + 1, var, exprInfija, r, overrideEval);
+        quadBlocks.add(block);
+
+        // Actualiza contexto de variables para evaluación posterior
+        if (toStore != null) {
+            varContext.set(var, toStore);
+        }
     }
-  }
+
 
   // ===== Buffer para reconstruir la expresión INFija mientras se parsea =====
   private final StringBuilder exprBuffer = new StringBuilder();
@@ -314,7 +339,7 @@ exprBufClear();
 // =============================
 
 // VAR (con inicialización opcional)
-  final public void DeclaracionVar() throws ParseException {Token id; Token tipo=null; Token exp=null;
+  final public void DeclaracionVar() throws ParseException {Token id=null; Token tipo=null; Token expTok=null;
     jj_consume_token(VAR);
     id = jj_consume_token(IDENT);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -330,30 +355,27 @@ exprBufClear();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IGUAL:{
       jj_consume_token(IGUAL);
-exprBufClear(); // capturar la infija que viene
+exprBufClear();
+      expTok = Exp(null);
+// Inserta símbolo antes de validar
+         Semantico.TokenAsignaciones.InsertarSimbolo(id, (tipo != null ? tipo.kind : TurixConstants.INT), null);
 
-      exp = Exp(id);
-// 1) Inserta primero el símbolo (para que exista durante la validación de la derecha)
-     TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : TurixConstants.INT, null);
-
-     // 2) Validar con la EXPRESIÓN COMPLETA (no con el primer token)
-    int __semBefore = erroresSem.getErrores().size();
-    TokenAsignaciones.checkAsing(id, exprBufGet());
-
-    // 3) Generar cuádruplas solo si no se agregó error semántico
-    if (erroresSem.getErrores().size() == __semBefore) {
-        emitQuad(id.image, exprBufGet());
-    }
+         // Valida semántica y condiciona la generación
+         int __semBefore = erroresSem.getErrores().size();
+         Semantico.TokenAsignaciones.checkAsing(id, exprBufGet());
+         if (erroresSem.getErrores().size() == __semBefore) {
+             emitQuad(id.image, exprBufGet());
+         }
       break;
       }
     default:
       jj_la1[8] = jj_gen;
       ;
     }
-// si no hubo = expr; inserta el símbolo sin valor
-    if (exp == null) {
-        TokenAsignaciones.InsertarSimbolo(id, tipo != null ? tipo.kind : TurixConstants.INT, null);
-    }
+// Si no hubo asignación, solo declara
+      if (expTok == null) {
+         Semantico.TokenAsignaciones.InsertarSimbolo(id, (tipo != null ? tipo.kind : TurixConstants.INT), null);
+      }
 }
 
 // LET (con inicialización opcional)
@@ -403,18 +425,19 @@ emitQuad(id.image, exprBufGet());
 }
 
 // ASIGNACIÓN
-  final public void Asignacion() throws ParseException {Token izq; Token der;
+  final public void Asignacion() throws ParseException {Token izq=null;
     izq = jj_consume_token(IDENT);
     jj_consume_token(IGUAL);
-exprBufClear(); // limpiar buffer antes de leer la expr
-
-    der = Exp(null);
-// Validar contra la EXPRESIÓN INFija reconstruida
+exprBufClear();
+    Exp(null);
+// Valida semántica y condiciona generación
         int __semBefore = erroresSem.getErrores().size();
-        TokenAsignaciones.checkAsing(izq, exprBufGet());
+        Semantico.TokenAsignaciones.checkAsing(izq, exprBufGet());
         if (erroresSem.getErrores().size() == __semBefore) {
             emitQuad(izq.image, exprBufGet());
-}
+        }
+        // else: hubo error semántico -> no generes cuádruplas de esta asignación
+
 }
 
 // =============================
@@ -1125,116 +1148,15 @@ emitText(")");
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3R_ElseIf_228_6_11()
- {
-    if (jj_scan_token(ELSE)) return true;
-    if (jj_scan_token(IF)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Tipo_362_7_21()
- {
-    if (jj_scan_token(DOUBLE)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Tipo_361_7_20()
- {
-    if (jj_scan_token(BOOL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_DecElse_222_5_10()
- {
-    if (jj_scan_token(ELSE)) return true;
-    if (jj_scan_token(K_I)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Tipo_360_7_19()
- {
-    if (jj_scan_token(STRING)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Tipo_359_7_18()
- {
-    if (jj_scan_token(FLOAT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_Tipo_358_7_16()
- {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_Tipo_358_7_17()) {
-    jj_scanpos = xsp;
-    if (jj_3R_Tipo_359_7_18()) {
-    jj_scanpos = xsp;
-    if (jj_3R_Tipo_360_7_19()) {
-    jj_scanpos = xsp;
-    if (jj_3R_Tipo_361_7_20()) {
-    jj_scanpos = xsp;
-    if (jj_3R_Tipo_362_7_21()) return true;
-    }
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_Tipo_358_7_17()
- {
-    if (jj_scan_token(INT)) return true;
-    return false;
-  }
-
-  private boolean jj_3_7()
- {
-    if (jj_3R_ParametroLlamadaFun_398_3_12()) return true;
-    return false;
-  }
-
-  private boolean jj_3_2()
- {
-    if (jj_3R_DecElse_222_5_10()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_LlamadoFunc_392_16_13()
- {
-    if (jj_3R_funcionesDefinidas_380_4_15()) return true;
-    return false;
-  }
-
-  private boolean jj_3_5()
- {
-    if (jj_3R_ElseIf_228_6_11()) return true;
-    return false;
-  }
-
-  private boolean jj_3_6()
- {
-    if (jj_3R_LlamadoFunc_392_4_9()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_ParametroLlamadaFun_398_3_12()
- {
-    if (jj_scan_token(IDENT)) return true;
-    if (jj_scan_token(DOS_PUN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_LlamadoFunc_392_4_9()
+  private boolean jj_3R_LlamadoFunc_417_4_9()
  {
     Token xsp;
     xsp = jj_scanpos;
     if (jj_scan_token(60)) {
     jj_scanpos = xsp;
-    if (jj_3R_LlamadoFunc_392_16_13()) {
+    if (jj_3R_LlamadoFunc_417_16_13()) {
     jj_scanpos = xsp;
-    if (jj_3R_LlamadoFunc_392_39_14()) return true;
+    if (jj_3R_LlamadoFunc_417_39_14()) return true;
     }
     }
     if (jj_scan_token(PAR_I)) return true;
@@ -1243,17 +1165,17 @@ emitText(")");
 
   private boolean jj_3_1()
  {
-    if (jj_3R_LlamadoFunc_392_4_9()) return true;
+    if (jj_3R_LlamadoFunc_417_4_9()) return true;
     return false;
   }
 
   private boolean jj_3_3()
  {
-    if (jj_3R_ElseIf_228_6_11()) return true;
+    if (jj_3R_ElseIf_253_6_11()) return true;
     return false;
   }
 
-  private boolean jj_3R_funcionesDefinidas_380_4_15()
+  private boolean jj_3R_funcionesDefinidas_405_4_15()
  {
     Token xsp;
     xsp = jj_scanpos;
@@ -1276,15 +1198,116 @@ emitText(")");
     return false;
   }
 
-  private boolean jj_3R_LlamadoFunc_392_39_14()
+  private boolean jj_3R_LlamadoFunc_417_39_14()
  {
-    if (jj_3R_Tipo_358_7_16()) return true;
+    if (jj_3R_Tipo_383_7_16()) return true;
     return false;
   }
 
   private boolean jj_3_4()
  {
-    if (jj_3R_DecElse_222_5_10()) return true;
+    if (jj_3R_DecElse_247_5_10()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_ElseIf_253_6_11()
+ {
+    if (jj_scan_token(ELSE)) return true;
+    if (jj_scan_token(IF)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_387_7_21()
+ {
+    if (jj_scan_token(DOUBLE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_386_7_20()
+ {
+    if (jj_scan_token(BOOL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_DecElse_247_5_10()
+ {
+    if (jj_scan_token(ELSE)) return true;
+    if (jj_scan_token(K_I)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_385_7_19()
+ {
+    if (jj_scan_token(STRING)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_384_7_18()
+ {
+    if (jj_scan_token(FLOAT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_383_7_16()
+ {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_Tipo_383_7_17()) {
+    jj_scanpos = xsp;
+    if (jj_3R_Tipo_384_7_18()) {
+    jj_scanpos = xsp;
+    if (jj_3R_Tipo_385_7_19()) {
+    jj_scanpos = xsp;
+    if (jj_3R_Tipo_386_7_20()) {
+    jj_scanpos = xsp;
+    if (jj_3R_Tipo_387_7_21()) return true;
+    }
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_Tipo_383_7_17()
+ {
+    if (jj_scan_token(INT)) return true;
+    return false;
+  }
+
+  private boolean jj_3_7()
+ {
+    if (jj_3R_ParametroLlamadaFun_423_3_12()) return true;
+    return false;
+  }
+
+  private boolean jj_3_2()
+ {
+    if (jj_3R_DecElse_247_5_10()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_LlamadoFunc_417_16_13()
+ {
+    if (jj_3R_funcionesDefinidas_405_4_15()) return true;
+    return false;
+  }
+
+  private boolean jj_3_5()
+ {
+    if (jj_3R_ElseIf_253_6_11()) return true;
+    return false;
+  }
+
+  private boolean jj_3_6()
+ {
+    if (jj_3R_LlamadoFunc_417_4_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_ParametroLlamadaFun_423_3_12()
+ {
+    if (jj_scan_token(IDENT)) return true;
+    if (jj_scan_token(DOS_PUN)) return true;
     return false;
   }
 
