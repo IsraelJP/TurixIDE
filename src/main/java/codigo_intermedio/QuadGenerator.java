@@ -37,7 +37,7 @@ public final class QuadGenerator {
 
         // 2) Generar cuádruplas y traza de pila de evaluación
         List<String> evalTrace = new ArrayList<>();
-        List<Quadruple> quads = buildQuadsFromPostfix(postfix, target, evalTrace);
+        List<Quadruple> quads = buildQuadsFromPostfix(postfix, target, evalTrace, variables);
 
         // 3) Evaluación estática (si aplica)
         Double eval = tryEvalPostfix(postfix, variables);
@@ -45,7 +45,9 @@ public final class QuadGenerator {
         return new Result(quads, postfix, eval, tr.steps, evalTrace);
     }
 
-    private static List<Quadruple> buildQuadsFromPostfix(String postfix, String targetVar, List<String> evalTrace) {
+    private static List<Quadruple> buildQuadsFromPostfix(String postfix, String targetVar,
+                                                        List<String> evalTrace,
+                                                        Map<String, Double> variables) {
         List<Quadruple> quads = new ArrayList<>();
         if (postfix == null || postfix.isBlank()) return quads;
 
@@ -63,8 +65,10 @@ public final class QuadGenerator {
                 stack.push(t);
                 evalTrace.add(String.format("Paso %02d: aplicar '%s' => push(%s) | pila=%s", paso++, tk, t, stack));
             } else {
-                stack.push(tk);
-                evalTrace.add(String.format("Paso %02d: push(%s) | pila=%s", paso++, tk, stack));
+                String resolved = resolveOperand(tk, variables);
+                stack.push(resolved);
+                String shown = tk.equals(resolved) ? tk : tk + "->" + resolved;
+                evalTrace.add(String.format("Paso %02d: push(%s) | pila=%s", paso++, shown, stack));
             }
         }
 
@@ -75,6 +79,38 @@ public final class QuadGenerator {
     }
 
     private static boolean isOperator(String s) { return OPS.contains(s); }
+
+    private static String resolveOperand(String token, Map<String, Double> variables) {
+        if (variables == null || token == null || token.isBlank()) return token;
+        Double value = variables.get(token);
+        if (value == null) return token;
+        return formatNumber(value);
+    }
+
+    private static String formatNumber(Double value) {
+        if (value == null) return "";
+        if (value.isNaN() || value.isInfinite()) {
+            return value.toString();
+        }
+        double dbl = value;
+        if (Math.floor(dbl) == dbl) {
+            long asLong = (long) dbl;
+            return Long.toString(asLong);
+        }
+        String str = Double.toString(dbl);
+        if (str.contains("E") || str.contains("e")) {
+            return str;
+        }
+        if (str.indexOf('.') >= 0) {
+            while (str.endsWith("0")) {
+                str = str.substring(0, str.length() - 1);
+            }
+            if (str.endsWith(".")) {
+                str = str.substring(0, str.length() - 1);
+            }
+        }
+        return str;
+    }
 
     private static Double tryEvalPostfix(String postfix, Map<String, Double> vars) {
         if (postfix == null || postfix.isBlank()) return null;
