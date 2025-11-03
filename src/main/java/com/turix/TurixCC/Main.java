@@ -272,7 +272,8 @@ private void onEvaluate(ActionEvent e) {
             t = lex.getNextToken();
             if (t.kind == TurixConstants.EOF) break;
 
-            if ( t.kind == TurixConstants.ERROROPERA
+            if (t.kind == TurixConstants.ERROR_IDENT
+                || t.kind == TurixConstants.ERROROPERA
                 || t.kind == TurixConstants.ERROR) {
                 erroresLex++;
                 lexArea.append(String.format(
